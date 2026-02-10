@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,29 +16,36 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  try {
+    const user = await login(email, password);
 
-    const success = await login(email, password);
-
-    if (success) {
-      toast({
-        title: 'Welcome back!',
-        description: 'You have successfully logged in.',
-      });
-      navigate('/');
-    } else {
-      toast({
-        title: 'Login failed',
-        description: 'Invalid email or password.',
-        variant: 'destructive',
-      });
+    if (user?.user?.role === "admin") {
+      navigate("/admin");
+    } else if (user?.user?.role === "superadmin") {
+      navigate("/superadmin");
+    } else if(user?.user?.role ==="user") {
+      navigate("/");
+    }
+    else{
+      navigate("/login");
     }
 
+  } catch (err) {
+    console.error(err);
+    toast({
+      title: "Something went wrong",
+      description: "Please try again later.",
+      variant: "destructive",
+    });
+  } finally {
     setIsLoading(false);
-  };
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -88,19 +95,56 @@ const Login = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full flex items-center justify-center gap-2"
+              disabled={isLoading || !email || !password}
+            >
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
+
           </form>
 
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-sm font-medium text-foreground mb-2">Demo Accounts:</p>
-            <div className="space-y-1 text-sm text-muted-foreground">
-              <p><strong>User:</strong> user@demo.com / demo123</p>
-              <p><strong>Admin:</strong> admin@demo.com / admin123</p>
-              <p><strong>Super Admin:</strong> super@demo.com / super123</p>
-            </div>
-          </div>
+          <div className="mt-6 space-y-4">
+
+  {/* Google Sign In */}
+  <Button
+    variant="outline"
+    className="w-full flex items-center justify-center gap-2"
+    onClick={() => {
+      // yaha baad me Google auth logic lagana
+      console.log("Google Sign In");
+    }}
+  >
+    <img
+      src="https://www.svgrepo.com/show/475656/google-color.svg"
+      alt="Google"
+      className="h-4 w-4"
+    />
+    Sign in with Google
+  </Button>
+
+  {/* Divider */}
+  <div className="flex items-center gap-2">
+    <div className="flex-1 h-px bg-border" />
+    <span className="text-xs text-muted-foreground">OR</span>
+    <div className="flex-1 h-px bg-border" />
+  </div>
+
+  {/* Login link */}
+  <p className="text-center text-sm text-muted-foreground">
+    Don&apos;t have an account?{" "}
+    <Link
+      to="/register"
+      className="text-primary font-medium hover:underline"
+    >
+      Sign Up
+    </Link>
+  </p>
+
+</div>
+
         </CardContent>
       </Card>
     </div>

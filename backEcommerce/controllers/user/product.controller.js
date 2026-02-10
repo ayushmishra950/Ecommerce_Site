@@ -1,10 +1,21 @@
 const Product = require("../../models/product.model");
-
+const Category = require("../../models/category.model");
 /**
  * @desc    Get all products
  * @route   GET /api/products
  * @access  Public (User)
  */
+
+const getAllCategory = async(req,res) => {
+  try{
+    const category = await Category.find({isActive:true});
+
+    res.status(200).json({data:category, message:"All Category Found Successfully."})
+  }
+  catch(err){
+   return res.status(500).json({message:`Error:= ${err.message}`})
+  }
+} 
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({ isActive: true });
@@ -96,12 +107,14 @@ const searchProducts = async (req, res) => {
  * @access  Public (User)
  */
 const getProductsByCategory = async (req, res) => {
+  const {category} = req.params;
+  if(!category) return res.status(404).json({success: false, message:"Category Id Not Found."})
   try {
     const products = await Product.find({
-      category: req.params.category,
+      category: category,
       isActive: true,
-    });
-
+    }).populate("category","name description");
+ 
     res.status(200).json({
       success: true,
       count: products.length,
@@ -121,4 +134,5 @@ module.exports = {
   getProductById,
   searchProducts,
   getProductsByCategory,
+  getAllCategory
 };

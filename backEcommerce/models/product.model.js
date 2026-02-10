@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema(
   {
     // 🔐 Admin / Seller reference
-    userId: {
+    adminId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
       required: true,
@@ -41,10 +41,9 @@ const productSchema = new mongoose.Schema(
 
     // 🗂️ Category
     category: {
-      type: String,
-      required: true,
-      lowercase: true,
-      trim: true,
+     type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true
     },
 
     // 🖼️ Images
@@ -72,10 +71,18 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    shopId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Shop",
+      required: true
+    }
   },
   {
     timestamps: true, // createdAt & updatedAt
   }
 );
+
+ // ✅ Unique index: same name cannot exist in the same shop
+productSchema.index({ name: 1, shopId: 1 }, { unique: true });
 
 module.exports = mongoose.model("Product", productSchema);

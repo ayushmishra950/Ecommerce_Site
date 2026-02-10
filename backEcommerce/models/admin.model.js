@@ -22,7 +22,7 @@ const adminSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["superAdmin", "admin", "manager"],
+      enum: ["superadmin", "admin", "manager"],
       default: "admin",
     },
 
@@ -55,7 +55,13 @@ const adminSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
+      required:true
     },
+    shopId:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"Shop",
+      required:true
+    }
   },
   { timestamps: true }
 );

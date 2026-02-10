@@ -1,5 +1,7 @@
 const express = require("express");
 const setupSwagger = require("./swagger/swagger");
+const cors = require("cors");
+const {connectDB} = require("./config/db");
 
 // user k liye
 const userAuthRoutes = require("./routes/user/auth.route");
@@ -18,10 +20,17 @@ const adminAuthRoutes = require("./routes/admin/auth.route");
  const adminCategoryRoutes = require("./routes/admin/category.route");
  const adminUserRoutes = require("./routes/admin/user.route");
 
+
+//  Super admin k liye
+ const superAdminShopRoute = require("./routes/super-admin/shop-route");
+
+
 const app = express();
+connectDB();
 
 // Body parser
 app.use(express.json());
+app.use(cors({origin :"http://localhost:8080", credentials : true}))
 setupSwagger(app);
 
 // User Routes
@@ -38,6 +47,9 @@ app.use("/api/admin/order", adminOrderRoutes);
 app.use("/api/admin/coupon", adminCouponRoutes);
 app.use("/api/admin/category", adminCategoryRoutes);
 app.use("/api/admin/user", adminUserRoutes);
+// Super Admin Routes
+app.use("/api/superadmin/shop", superAdminShopRoute);
+
 
 
 // Default route

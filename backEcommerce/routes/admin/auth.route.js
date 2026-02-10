@@ -141,7 +141,7 @@ router.get("/", adminController.getAdmins);
  *       404:
  *         description: Admin not found
  */
-router.get("/:id", adminController.getAdminById);
+router.get("/getbyid", adminController.getAdminById);
 
 /**
  * @swagger
@@ -177,7 +177,7 @@ router.get("/:id", adminController.getAdminById);
  *       404:
  *         description: Admin not found
  */
-router.put("/:id", adminController.updateAdmin);
+router.put("/update", adminController.updateAdmin);
 
 /**
  * @swagger

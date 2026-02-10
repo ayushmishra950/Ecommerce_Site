@@ -125,7 +125,7 @@ router.get("/:id", getCategoryById);
  *       403:
  *         description: Access denied
  */
-router.put("/:id", updateCategory);
+router.put("/", updateCategory);
 
 /**
  * @swagger
@@ -156,7 +156,7 @@ router.put("/:id", updateCategory);
  *       403:
  *         description: Access denied
  */
-router.delete("/:id", deleteCategory);
+router.delete("/", deleteCategory);
 
 /**
  * @swagger
@@ -187,6 +187,6 @@ router.delete("/:id", deleteCategory);
  *       403:
  *         description: Access denied
  */
-router.patch("/:id/status", toggleCategoryStatus);
+router.patch("/status", toggleCategoryStatus);
 
 module.exports = router;

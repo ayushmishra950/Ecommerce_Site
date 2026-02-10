@@ -1,15 +1,81 @@
 const Product = require("../../models/product.model");
+const Shop = require("../../models/shop.model");
+const Admin = require("../../models/admin.model");
+const {uploadToCloudinary} = require("../../cloudinary/uploadImageToCloudinary");
 
-/**
- * ============================
- * CREATE PRODUCT (Admin & SuperAdmin)
- * ============================
- */
+
+const validateShopAndAdmin = async (shopId, adminId) => {
+  if (!shopId || !adminId) {
+    return { success: false, code: 400, message: "shopId and adminId are required" };
+  }
+
+  // Check Shop
+  const shop = await Shop.findById(shopId);
+  if (!shop) {
+    return { success: false, code: 404, message: "Shop not found" };
+  }
+
+  // Check Admin
+  const admin = await Admin.findOne({ _id: adminId, shopId });
+  if (!admin) {
+    return { success: false, code: 404, message: "Admin not found" };
+  }
+
+  if (admin.role !== "admin") {
+    return { success: false, code: 403, message: "Only admin can perform this action" };
+  }
+
+  return { success: true}; // return objects for further use
+};
+
+
+
 const createProduct = async (req, res) => {
   try {
+    const { shopId, adminId, name,price,category, stock, description, isActive  } = req.body;
+    const images = req.files?.images || [];
+     console.log(req?.files);
+     console.log(req?.file);
+     console.log(req?.files?.images)
+    console.log(req.body)
+    if(!shopId || !adminId || !name || !category  || !price ||  !stock || !description || !isActive){
+    return res.status(400).json({message:"All Fields Are Required."})
+    }
+
+    // ✅ 1. Validate Shop & Admin
+    const validated = await validateShopAndAdmin(shopId, adminId);
+    if (!validated.success) {
+      return res.status(validated.code).json({ success: false, message: validated.message });
+    }
+
+    // ✅ 2. Check if product with same name already exists in the shop
+    const existingProduct = await Product.findOne({ shopId, name });
+    if (existingProduct) {
+      return res.status(400).json({
+        success: false,
+        message: "Product with this name already exists in this shop",
+      });
+    }
+
+    // ✅ 3. Upload images to Cloudinary
+    let imageUrls = [];
+    if (Array.isArray(images) && images.length > 0) {
+      imageUrls = await Promise.all(
+        images.map(async (img) => {
+          const url = await uploadToCloudinary(img?.buffer);
+          return url;
+        })
+      );
+    }
+
+    // ✅ 3. Create the product
     const product = await Product.create({
-      ...req.body,
-      userId: req.user._id, // jis admin ne product add kiya
+      name,
+      price, stock, description, isActive,
+      shopId,
+      adminId,
+      images: imageUrls,
+      category
     });
 
     res.status(201).json({
@@ -18,33 +84,33 @@ const createProduct = async (req, res) => {
       data: product,
     });
   } catch (error) {
+    // Handle duplicate key error (if schema index is used)
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Duplicate product found",
+      });
+    }
+     console.log(error?.message)
     res.status(500).json({
       success: false,
-      message: "Product creation failed",
+      message: `Product creation failed:- ${error.message}`,
       error: error.message,
     });
   }
 };
 
-/**
- * ============================
- * GET PRODUCTS
- * Admin → apne products
- * SuperAdmin → sabke products
- * ============================
- */
+
 const getProducts = async (req, res) => {
   try {
-    let filter = {};
+    const { shopId, adminId } = req.query;
 
-    if (req.user.role === "admin") {
-      filter.userId = req.user._id;
-    }
+     await validateShopAndAdmin(shopId, adminId);
 
-    const products = await Product.find(filter).populate(
-      "userId",
-      "name email role"
-    );
+    const products = await Product.find({
+      shopId,
+      adminId,
+    }).populate("category", "name").populate("adminId", "name email");
 
     res.status(200).json({
       success: true,
@@ -60,19 +126,12 @@ const getProducts = async (req, res) => {
   }
 };
 
-/**
- * ============================
- * GET SINGLE PRODUCT
- * Admin → only own product
- * SuperAdmin → any product
- * ============================
- */
+
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate(
-      "userId",
-      "name email role"
-    );
+    const product = await Product.findById(req.params.id)
+      .populate("category", "name")
+      .populate("adminId", "name email");
 
     if (!product) {
       return res.status(404).json({
@@ -81,16 +140,11 @@ const getProductById = async (req, res) => {
       });
     }
 
-    // Admin ownership check
-    if (
-      req.user.role === "admin" &&
-      product.userId._id.toString() !== req.user._id.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied",
-      });
-    }
+    const validated = await validateShopAndAdmin(
+      product.shopId,
+      product.adminId
+    );
+    if (!validated) return;
 
     res.status(200).json({
       success: true,
@@ -105,13 +159,7 @@ const getProductById = async (req, res) => {
   }
 };
 
-/**
- * ============================
- * UPDATE PRODUCT
- * Admin → only own product
- * SuperAdmin → any product
- * ============================
- */
+
 const updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -123,16 +171,7 @@ const updateProduct = async (req, res) => {
       });
     }
 
-    // Ownership check
-    if (
-      req.user.role === "admin" &&
-      product.userId.toString() !== req.user._id.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "You can update only your own products",
-      });
-    }
+     await validateShopAndAdmin( product.shopId, product.adminId);
 
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -154,32 +193,19 @@ const updateProduct = async (req, res) => {
   }
 };
 
-/**
- * ============================
- * DELETE PRODUCT
- * Admin → only own product
- * SuperAdmin → any product
- * ============================
- */
+
 const deleteProduct = async (req, res) => {
+   const {adminId, shopId, id} = req.query;
   try {
-    const product = await Product.findById(req.params.id);
+
+      await validateShopAndAdmin(shopId,adminId);
+
+    const product = await Product.findById(id);
 
     if (!product) {
       return res.status(404).json({
         success: false,
         message: "Product not found",
-      });
-    }
-
-    // Ownership check
-    if (
-      req.user.role === "admin" &&
-      product.userId.toString() !== req.user._id.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "You can delete only your own products",
       });
     }
 
@@ -198,51 +224,25 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-/**
- * ============================
- * TOGGLE PRODUCT STATUS (SuperAdmin only)
- * ============================
- */
-const toggleProductStatus = async (req, res) => {
-  try {
-    if (req.user.role !== "superadmin") {
-      return res.status(403).json({
-        success: false,
-        message: "Only super admin can change product status",
-      });
-    }
+const toggleProductStatus = async(req,res) => {
+  try{
+        const {productId, adminId, shopId, status} = req.body;
+       await validateShopAndAdmin( shopId, adminId);
 
-    const product = await Product.findById(req.params.id);
+       const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
+      return res.status(404).json({ success: false, message: "Product not found"});
     }
 
-    product.isActive = !product.isActive;
-    await product.save();
+    product.isActive = status;
+    product.save();
 
-    res.status(200).json({
-      success: true,
-      message: "Product status updated",
-      isActive: product.isActive,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Status update failed",
-      error: error.message,
-    });
+     res.status(200).json({message:`Status ${status?"Active":"In-Active"} Successfully.`})
   }
-};
+  catch(err){
+    res.status(500).json({message:`Error:- ${err.message}`})
+  }
+}
 
-module.exports = {
-  createProduct,
-  getProducts,
-  getProductById,
-  updateProduct,
-  deleteProduct,
-  toggleProductStatus,
-};
+module.exports = {deleteProduct, updateProduct, getProductById, getProducts, createProduct, toggleProductStatus};

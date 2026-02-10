@@ -100,6 +100,8 @@ router.get("/search", productController.searchProducts);
  *       200:
  *         description: Category products fetched successfully
  */
-router.get("/category/:category", productController.getProductsByCategory);
+router.get("/category/allCategory",productController.getAllCategory)
+
+router.get("/allproduct/:category", productController.getProductsByCategory);
 
 module.exports = router;

@@ -28,10 +28,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative aspect-square overflow-hidden bg-muted">
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/product/${product._id}`}>
           <img
-            src={product.image}
-            alt={product.name}
+            src={product?.image}
+            alt={product?.name}
             className={cn(
               'w-full h-full object-cover transition-transform duration-500',
               isHovered && 'scale-110'
@@ -46,7 +46,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               -{discount}%
             </Badge>
           )}
-          {!product.inStock && (
+          {!product.stock && (
             <Badge variant="secondary">Out of Stock</Badge>
           )}
         </div>
@@ -76,7 +76,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <Button
             className="w-full"
             size="sm"
-            disabled={!product.inStock}
+            disabled={!product.stock}
             onClick={() => addToCart(product)}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
@@ -86,8 +86,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </div>
 
       <CardContent className="p-4">
-        <Link to={`/product/${product.id}`}>
-          <p className="text-sm text-muted-foreground mb-1">{product.category}</p>
+        <Link to={`/product/${product._id}`}>
+          <p className="text-sm text-muted-foreground mb-1">{product.category?.name}</p>
           <h3 className="font-semibold text-foreground line-clamp-2 mb-2 hover:text-primary transition-colors">
             {product.name}
           </h3>
@@ -98,11 +98,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             <Star className="h-4 w-4 fill-primary text-primary" />
             <span className="text-sm font-medium">{product.rating}</span>
           </div>
-          <span className="text-sm text-muted-foreground">({product.reviews})</span>
+          <span className="text-sm text-muted-foreground">({product.numReviews})</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-foreground">${product.price}</span>
+          <span className="text-lg font-bold text-foreground">₹{product.price}</span>
           {product.originalPrice && (
             <span className="text-sm text-muted-foreground line-through">
               ${product.originalPrice}

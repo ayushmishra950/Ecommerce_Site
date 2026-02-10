@@ -27,7 +27,7 @@ const checkAdminRole = async (userId) => {
  */
 const createCategory = async (req, res) => {
   try {
-    const { userId, name, description } = req.body;
+    const { userId, name, description, status, shopId } = req.body;
 
     const roleCheck = await checkAdminRole(userId);
     if (!roleCheck.allowed) {
@@ -37,7 +37,7 @@ const createCategory = async (req, res) => {
       });
     }
 
-    const exists = await Category.findOne({ name });
+    const exists = await Category.findOne({ name, shopId });
     if (exists) {
       return res.status(400).json({
         success: false,
@@ -48,6 +48,8 @@ const createCategory = async (req, res) => {
     const category = await Category.create({
       name,
       description,
+      isActive: status==="active"?true : false,
+      shopId
     });
 
     res.status(201).json({
@@ -71,7 +73,7 @@ const createCategory = async (req, res) => {
  */
 const getAllCategories = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId, shopId } = req.query;
 
     const roleCheck = await checkAdminRole(userId);
     if (!roleCheck.allowed) {
@@ -81,7 +83,7 @@ const getAllCategories = async (req, res) => {
       });
     }
 
-    const categories = await Category.find();
+    const categories = await Category.find({shopId});
 
     res.status(200).json({
       success: true,
@@ -104,7 +106,7 @@ const getAllCategories = async (req, res) => {
  */
 const getCategoryById = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId, shopId, id } = req.query;
 
     const roleCheck = await checkAdminRole(userId);
     if (!roleCheck.allowed) {
@@ -114,7 +116,7 @@ const getCategoryById = async (req, res) => {
       });
     }
 
-    const category = await Category.findById(req.params.id);
+    const category = await Category.find({_id : id, shopId});
 
     if (!category) {
       return res.status(404).json({
@@ -143,7 +145,7 @@ const getCategoryById = async (req, res) => {
  */
 const updateCategory = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, name, description, status, shopId, id } = req.body;
 
     const roleCheck = await checkAdminRole(userId);
     if (!roleCheck.allowed) {
@@ -153,9 +155,9 @@ const updateCategory = async (req, res) => {
       });
     }
 
-    const category = await Category.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+    const category = await Category.findOneAndUpdate(
+      {_id : id, shopId},
+      {name, description, isActive:(status==="active"?true : false)},
       { new: true, runValidators: true }
     );
 
@@ -187,7 +189,7 @@ const updateCategory = async (req, res) => {
  */
 const deleteCategory = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, shopId, id } = req.query;
 
     const roleCheck = await checkAdminRole(userId);
     if (!roleCheck.allowed) {
@@ -197,7 +199,7 @@ const deleteCategory = async (req, res) => {
       });
     }
 
-    const category = await Category.findById(req.params.id);
+    const category = await Category.findOne({_id: id, shopId});
 
     if (!category) {
       return res.status(404).json({
@@ -228,7 +230,8 @@ const deleteCategory = async (req, res) => {
  */
 const toggleCategoryStatus = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, shopId, id, status } = req.body;
+    console.log(req.body)
 
     const roleCheck = await checkAdminRole(userId);
     if (!roleCheck.allowed) {
@@ -238,7 +241,8 @@ const toggleCategoryStatus = async (req, res) => {
       });
     }
 
-    const category = await Category.findById(req.params.id);
+    const category = await Category.findOne({_id:id, shopId});
+    console.log(category)
 
     if (!category) {
       return res.status(404).json({
@@ -247,7 +251,7 @@ const toggleCategoryStatus = async (req, res) => {
       });
     }
 
-    category.isActive = !category.isActive;
+    category.isActive = status;
     await category.save();
 
     res.status(200).json({

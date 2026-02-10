@@ -1,32 +1,83 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Save, Lock, Bell, User, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { getAdminData, updateAdminData } from "@/services/service";
 
 const AdminSettings = () => {
-  const [storeSettings, setStoreSettings] = useState({
-    storeName: 'My E-Commerce Store',
-    storeEmail: 'admin@store.com',
-    currency: 'USD',
-  });
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [storeSettings, setStoreSettings] = useState({ storeName: '', storeEmail: '', currency: '' });
+  const [userData, setUserData] = useState<any>(null);
+  const [profile, setProfile] = useState({ name: '', email: '' });
+  const [security, setSecurity] = useState({ twoFactorAuth: true });
+  const [notifications, setNotifications] = useState({ orderUpdates: true, newCustomers: true, lowStock: false });
 
-  const [profile, setProfile] = useState({
-    name: 'Admin User',
-    email: 'admin@store.com',
-  });
+  const handleUpdateProfile = async () => {
+    if (!user?.id || !user?.shopId || !storeSettings?.storeName || !storeSettings?.currency || !profile?.name) return;
+    try {
+      const res = await updateAdminData(user?.id, user?.shopId, storeSettings, profile);
+      console.log(res);
+      if (res.status === 200) {
+        toast({ title: "Profile Updated.", description: res.data.message });
+        handleGetUser();
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({ title: "Error", description: err.response.data.message, variant: "destructive" })
+    }
+  }
+  const handleGetUser = async () => {
+    if (!user?.id || !user?.shopId) return;
+    try {
+      const res = await getAdminData(user?.id, user?.shopId);
+      console.log(res);
+      if (res.status === 200) {
+        setUserData(res.data)
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({ title: "Error", description: err.response.data.message, variant: "destructive" })
+    }
+  }
 
-  const [security, setSecurity] = useState({
-    twoFactorAuth: true,
-  });
+  useEffect(() => {
+    if (!userData) return;
+    // Store
+    setStoreSettings({
+      storeName: userData?.shopId?.name || "",
+      storeEmail: userData?.shopId?.email || "",
+      currency: userData?.shopId?.currency || "",
+    });
+    // Profile
+    setProfile({
+      name: userData?.name || "",
+      email: userData?.email || "",
+    });
+    // Security
+    setSecurity({
+      twoFactorAuth: userData.admin?.twoFactorAuth ?? false,
+    });
+    // Notifications
+    setNotifications({
+      orderUpdates: userData.notifications?.orderUpdates ?? false,
+      newCustomers: userData.notifications?.newCustomers ?? false,
+      lowStock: userData.notifications?.lowStock ?? false,
+    });
 
-  const [notifications, setNotifications] = useState({
-    orderUpdates: true,
-    newCustomers: true,
-    lowStock: false,
-  });
+  }, [userData]);
+
+
+  useEffect(() => {
+    handleGetUser();
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -51,6 +102,7 @@ const AdminSettings = () => {
             <Label>Store Email</Label>
             <Input
               type="email"
+              disabled
               value={storeSettings.storeEmail}
               onChange={(e) =>
                 setStoreSettings({ ...storeSettings, storeEmail: e.target.value })
@@ -92,6 +144,7 @@ const AdminSettings = () => {
             <Input
               type="email"
               value={profile.email}
+              disabled
               onChange={(e) =>
                 setProfile({ ...profile, email: e.target.value })
               }
@@ -161,7 +214,7 @@ const AdminSettings = () => {
       </Card>
 
       {/* Save Button */}
-      <div className="flex justify-end">
+      <div className="flex justify-end" onClick={handleUpdateProfile}>
         <Button className="gap-2">
           <Save className="h-4 w-4" />
           Save Changes

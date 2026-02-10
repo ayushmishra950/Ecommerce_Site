@@ -18,6 +18,15 @@ const categorySchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    product : [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+    }],
+     shopId:{
+          type:mongoose.Schema.Types.ObjectId,
+          ref:"Shop",
+          required:true
+        }
   },
   { timestamps: true }
 );

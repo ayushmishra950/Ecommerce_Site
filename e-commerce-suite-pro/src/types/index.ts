@@ -1,14 +1,20 @@
+
+interface Category{
+  _id:string;
+  name:string;
+  description:string;
+}
 export interface Product {
-  id: string;
+  _id: string;
   name: string;
   price: number;
   originalPrice?: number;
   description: string;
   image: string;
-  category: string;
+  category: Category;
   rating: number;
-  reviews: number;
-  inStock: boolean;
+  numReviews: number;
+  stock: boolean;
   variants?: ProductVariant[];
 }
 
@@ -31,6 +37,8 @@ export interface User {
   email: string;
   avatar?: string;
   role: 'user' | 'admin' | 'superadmin';
+  createdBy: string;
+  shopId: string;
 }
 
 export interface Order {

@@ -19,7 +19,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      select: false,
     },
 
     role: {
@@ -82,5 +81,6 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 
 module.exports = mongoose.model("User", userSchema);

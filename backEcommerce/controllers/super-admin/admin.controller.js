@@ -1,23 +1,30 @@
-const Admin = require("../models/admin.model");
+const Admin = require("../../models/admin.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Shop = require("../../models/shop.model")
 
 /* =========================
    CREATE ADMIN (SuperAdmin)
 ========================= */
 exports.createAdmin = async (req, res) => {
   try {
-    const superAdminId = req.admin._id; // token se aa raha hoga
-    const { name, email, password, role, permissions } = req.body;
+    const { name, email, password, role, shopId, permissions, userId } = req.body;
+
+    const superAdmin = await Admin.findOne({_id:userId});
+    if(!superAdmin) return res.status(404).json({message: "You are not authorized.", success: false})
 
     // sirf superAdmin ko allow
-    if (req.admin.role !== "superAdmin") {
-      return res.status(403).json({ message: "Access denied" });
+    if (superAdmin?.role !== "superadmin") {
+      return res.status(403).json({ message: "Access denied:- You do not have permission to perform this action.", success: false });
     }
 
-    const exists = await Admin.findOne({ email });
+    const shop = await Shop.findOne({_id:shopId});
+    if(!shop) return res.status(404).json({message:"Shop Not Found.", success: false});
+    if(shop.admins.length !== 0) return res.status(404).json({message:"This shop already has an admin assigned.", success: false}) 
+
+    const exists = await Admin.findOne({ email, shopId });
     if (exists) {
-      return res.status(400).json({ message: "Admin already exists" });
+      return res.status(400).json({ message: "Admin already exists", success: false});
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -28,16 +35,22 @@ exports.createAdmin = async (req, res) => {
       password: hashedPassword,
       role: role || "admin",
       permissions,
-      createdBy: superAdminId,
+      createdBy: superAdmin?._id,
     });
 
     res.status(201).json({
       message: "Admin created successfully",
       admin,
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  }catch (err) {
+
+  // 🔑 Duplicate key error (email already exists)
+  if (err.code === 11000) {
+    return res.status(409).json({ success: false, message: "An admin with this email already exists." });
   }
+  // 🧯 Fallback error
+  return res.status(500).json({ success: false, message: "Internal server error"});
+}
 };
 
 /* =========================
@@ -46,6 +59,7 @@ exports.createAdmin = async (req, res) => {
 exports.adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(req.body)
 
     const admin = await Admin.findOne({ email });
     if (!admin) {

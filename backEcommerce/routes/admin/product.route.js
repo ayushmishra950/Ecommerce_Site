@@ -8,7 +8,7 @@ const {
   deleteProduct,
   toggleProductStatus,
 } = require("../../controllers/admin/product.controller");
-
+const upload = require("../../cloudinary/upload");
 // Middleware for authentication
 // const { verifyAdminToken } = require("../../middlewares/auth.middleware");
 
@@ -57,7 +57,8 @@ const {
  *       403:
  *         description: Access denied
  */
-router.post("/", createProduct);
+router.post("/", upload.fields([
+    { name: "images", maxCount: 5 }]), createProduct);
 
 /**
  * @swagger
@@ -166,7 +167,7 @@ router.put("/:id", updateProduct);
  *       404:
  *         description: Product not found
  */
-router.delete("/:id", deleteProduct);
+router.delete("/", deleteProduct);
 
 /**
  * @swagger
@@ -190,6 +191,6 @@ router.delete("/:id", deleteProduct);
  *       404:
  *         description: Product not found
  */
-router.patch("/:id/status", toggleProductStatus);
+router.patch("/status", toggleProductStatus);
 
 module.exports = router;

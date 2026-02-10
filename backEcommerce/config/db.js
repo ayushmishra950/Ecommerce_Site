@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
+  if(!process.env.MONGO_URI) return { message : "mongodb url are missing."}
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("✅ MongoDB Connected Successfully.");
@@ -9,5 +10,6 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
+
 
 module.exports = {connectDB};
