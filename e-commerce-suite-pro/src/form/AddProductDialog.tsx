@@ -43,7 +43,7 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
                 images: [],
                 isActive:initialData?.isActive || false,
             })
-            setImagePreviews([])
+            setImagePreviews(initialData?.images)
         }
     }, [initialData]);
 
@@ -283,7 +283,7 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
           {imagePreviews.map((img, index) => (
             <div key={index} className="relative w-14 h-14 border rounded">
               <img
-                src={img.url}
+                src={img.url || img}
                 alt="preview"
                 className="w-full h-full object-cover"
               />
@@ -313,7 +313,7 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
         <Button
           type="submit"
           className="h-8 px-3 text-xs"
-          disabled={loading}
+          disabled={loading || !formData?.category || !formData?.description  || !formData?.name || !formData?.price ||!formData?.stock}
         >
           {loading && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
           {isEdit ? "Update" : "Add"} Product

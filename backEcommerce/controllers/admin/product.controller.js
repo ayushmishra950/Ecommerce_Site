@@ -34,10 +34,7 @@ const createProduct = async (req, res) => {
   try {
     const { shopId, adminId, name,price,category, stock, description, isActive  } = req.body;
     const images = req.files?.images || [];
-     console.log(req?.files);
-     console.log(req?.file);
-     console.log(req?.files?.images)
-    console.log(req.body)
+   
     if(!shopId || !adminId || !name || !category  || !price ||  !stock || !description || !isActive){
     return res.status(400).json({message:"All Fields Are Required."})
     }
@@ -111,7 +108,6 @@ const getProducts = async (req, res) => {
       shopId,
       adminId,
     }).populate("category", "name").populate("adminId", "name email");
-
     res.status(200).json({
       success: true,
       count: products.length,
@@ -128,8 +124,11 @@ const getProducts = async (req, res) => {
 
 
 const getProductById = async (req, res) => {
+  const {id} = req.params;
+  console.log(id);
+  if(!id) return res.status(400).json({message:"Product Id Not Found."})
   try {
-    const product = await Product.findById(req.params.id)
+    const product = await Product.findById(id)
       .populate("category", "name")
       .populate("adminId", "name email");
 
@@ -159,11 +158,13 @@ const getProductById = async (req, res) => {
   }
 };
 
-
 const updateProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const { shopId, adminId, name,price,category, stock, description, isActive } = req.body;
+    const images = req.files?.images || [];
 
+    // ✅ 1. Find Product
+    const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -171,28 +172,82 @@ const updateProduct = async (req, res) => {
       });
     }
 
-     await validateShopAndAdmin( product.shopId, product.adminId);
-
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
+    // ✅ 2. Validate Shop & Admin
+    const validated = await validateShopAndAdmin(
+      shopId,
+      adminId
     );
+
+    if (!validated.success) {
+      return res
+        .status(validated.code)
+        .json({ success: false, message: validated.message });
+    }
+
+    // ✅ 3. Check duplicate name (if name is being changed)
+    if (name && name !== product.name) {
+      const existingProduct = await Product.findOne({
+        shopId: product.shopId,
+        name,
+        _id: { $ne: product._id }, // exclude current product
+      });
+
+      if (existingProduct) {
+        return res.status(400).json({
+          success: false,
+          message: "Product with this name already exists in this shop",
+        });
+      }
+    }
+
+    // ✅ 4. Upload new images (if provided)
+    let imageUrls = product.images || [];
+
+    if (Array.isArray(images) && images.length > 0) {
+      const uploadedImages = await Promise.all(
+        images.map(async (img) => {
+          const url = await uploadToCloudinary(img?.buffer);
+          return url;
+        })
+      );
+
+      // Replace old images with new ones
+      imageUrls = uploadedImages;
+    }
+
+    // ✅ 5. Update product fields
+    product.name = name ?? product.name;
+    product.price = price ?? product.price;
+    product.category = category ?? product.category;
+    product.stock = stock ?? product.stock;
+    product.description = description ?? product.description;
+    product.isActive = isActive ?? product.isActive;
+    product.images = imageUrls;
+
+    await product.save();
 
     res.status(200).json({
       success: true,
       message: "Product updated successfully",
-      data: updatedProduct,
+      data: product,
     });
   } catch (error) {
+    console.log(error?.message);
+
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Duplicate product found",
+      });
+    }
+
     res.status(500).json({
       success: false,
-      message: "Product update failed",
+      message: `Product update failed:- ${error.message}`,
       error: error.message,
     });
   }
 };
-
 
 const deleteProduct = async (req, res) => {
    const {adminId, shopId, id} = req.query;

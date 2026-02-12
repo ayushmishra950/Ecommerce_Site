@@ -2,6 +2,7 @@ const express = require("express");
 const setupSwagger = require("./swagger/swagger");
 const cors = require("cors");
 const {connectDB} = require("./config/db");
+const {protect} = require("./middlewares/auth.middleware")
 
 // user k liye
 const userAuthRoutes = require("./routes/user/auth.route");
@@ -35,20 +36,20 @@ setupSwagger(app);
 
 // User Routes
 app.use("/api/user/auth", userAuthRoutes);
-app.use("/api/user/profile", profileRoutes);
-app.use("/api/user/cart", cartRoutes);
-app.use("/api/user/order", orderRoutes);
-app.use("/api/user/payment", paymentRoutes);
-app.use("/api/user/product", productRoutes);
+app.use("/api/user/profile",protect, profileRoutes);
+app.use("/api/user/cart",protect, cartRoutes);
+app.use("/api/user/order",protect, orderRoutes);
+app.use("/api/user/payment",protect, paymentRoutes);
+app.use("/api/user/product",protect, productRoutes);
 //  Admin Routes
 app.use("/api/admin/auth", adminAuthRoutes);
-app.use("/api/admin/product", adminProductRoutes);
-app.use("/api/admin/order", adminOrderRoutes);
-app.use("/api/admin/coupon", adminCouponRoutes);
-app.use("/api/admin/category", adminCategoryRoutes);
-app.use("/api/admin/user", adminUserRoutes);
+app.use("/api/admin/product",protect, adminProductRoutes);
+app.use("/api/admin/order",protect, adminOrderRoutes);
+app.use("/api/admin/coupon",protect, adminCouponRoutes);
+app.use("/api/admin/category",protect, adminCategoryRoutes);
+app.use("/api/admin/user",protect, adminUserRoutes);
 // Super Admin Routes
-app.use("/api/superadmin/shop", superAdminShopRoute);
+app.use("/api/superadmin/shop",protect, superAdminShopRoute);
 
 
 

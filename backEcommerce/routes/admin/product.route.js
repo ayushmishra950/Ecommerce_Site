@@ -143,7 +143,8 @@ router.get("/:id", getProductById);
  *       404:
  *         description: Product not found
  */
-router.put("/:id", updateProduct);
+router.put("/:id",upload.fields([
+    { name: "images", maxCount: 5 }]), updateProduct);
 
 /**
  * @swagger

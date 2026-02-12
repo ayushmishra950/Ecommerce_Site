@@ -13,6 +13,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
+  console.log(product)
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const { addToCart } = useCart();
@@ -30,7 +31,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Link to={`/product/${product._id}`}>
           <img
-            src={product?.image}
+            src={product?.images?.[0]}
             alt={product?.name}
             className={cn(
               'w-full h-full object-cover transition-transform duration-500',

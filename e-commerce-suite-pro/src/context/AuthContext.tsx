@@ -111,8 +111,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await loginUser(obj);
       console.log(response)
     if(response.status ===200){
-      const { token } = response.data
-      localStorage.setItem('token', token)
+      const { accessToken } = response.data
+      localStorage.setItem('accessToken', accessToken)
 
       const userInfo: User = {
         id: response?.data?.admin?._id, 

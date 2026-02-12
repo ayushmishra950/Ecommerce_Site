@@ -52,7 +52,7 @@ const { protect } = require("../../middlewares/auth.middleware");
  *       401:
  *         description: Not authorized / Token invalid
  */
-router.get("/me", protect, getUserProfile);
+// router.get("/me", protect, getUserProfile);
 
 /**
  * @swagger
@@ -114,6 +114,6 @@ router.get("/me", protect, getUserProfile);
  *       401:
  *         description: Not authorized / Token invalid
  */
-router.put("/update", protect, updateUserProfile);
+// router.put("/update", protect, updateUserProfile);
 
 module.exports = router;

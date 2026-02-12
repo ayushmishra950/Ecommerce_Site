@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Shop = require("../../models/shop.model");
 const User = require("../../models/user.model");
+const {generateAccessToken, generateRefreshToken} = require("../../utils/jwt.util");
 
 
 // JWT secret
@@ -91,19 +92,33 @@ exports.loginAdmin = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid password." });
     }
-    // Generate JWT
-    const token = jwt.sign(
-      { id: admin._id, role: admin.role },
-      JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+
+    const payload = {
+  id: admin._id,
+  role: admin.role,
+};
+
+const accessToken = generateAccessToken(payload);
+const refreshToken = generateRefreshToken(payload);
+
+
+    // Save refresh token in DB (Recommended)
+    admin.refreshToken = refreshToken;
 
     if(admin.role === "admin"){
       admin.lastLogin = new Date();
     }
     await admin.save();
 
-    res.status(200).json({ message: "Login successful", token, admin });
+    // 🔐 Store Refresh Token in HttpOnly Cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // https only in prod
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.status(200).json({ message: "Login successful", accessToken, admin });
   } catch (error) {
   console.error(error); // Console me full error dekhne ke liye
   res.status(500).json({ message: "Server error", error: error.message});
@@ -120,6 +135,79 @@ exports.getAdmins = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken)
+      return res.status(401).json({ message: "No refresh token" });
+
+    let decoded;
+
+    try {
+      decoded = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+      );
+    } catch (err) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
+    let user = await Admin.findById(decoded.id);
+    if (!user) user = await User.findById(decoded.id);
+
+    if (!user || user.refreshToken !== refreshToken)
+      return res.status(403).json({ message: "Unauthorized" });
+
+    const newAccessToken = generateAccessToken({
+      id: user._id,
+      role: user.role,
+    });
+
+    res.status(200).json({
+      accessToken: newAccessToken,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+exports.logout = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken) {
+      let decoded = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+      );
+
+      let user = await Admin.findById(decoded.id);
+      if (!user) user = await User.findById(decoded.id);
+
+      if (user) {
+        user.refreshToken = null;
+        await user.save();
+      }
+    }
+
+    // Clear cookie
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.status(200).json({ message: "Logged out successfully" });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 // =================== GET SINGLE ADMIN ===================
 exports.getAdminById = async (req, res) => {

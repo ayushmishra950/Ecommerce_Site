@@ -107,6 +107,10 @@ router.post("/register", adminController.registerAdmin);
  */
 router.post("/login", adminController.loginAdmin);
 
+
+router.post("/refreshToken", adminController?.refreshToken);
+
+router.post("/logout", adminController?.logout)
 /**
  * @swagger
  * /:

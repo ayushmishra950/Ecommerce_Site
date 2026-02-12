@@ -61,6 +61,9 @@ const adminSchema = new mongoose.Schema(
       type:mongoose.Schema.Types.ObjectId,
       ref:"Shop",
       required:true
+    },
+    refreshToken :{
+      type:String, default:null
     }
   },
   { timestamps: true }

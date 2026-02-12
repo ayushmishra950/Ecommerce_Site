@@ -40,8 +40,10 @@ const getAllProducts = async (req, res) => {
  * @access  Public (User)
  */
 const getProductById = async (req, res) => {
+  const {id} = req?.params;
+  console.log(id)
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(id).populate("category");
 
     if (!product || !product.isActive) {
       return res.status(404).json({

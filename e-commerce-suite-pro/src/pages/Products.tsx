@@ -15,13 +15,13 @@ import { products } from '@/data/products';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import {getProductByCategoryId} from "@/services/service";
+import {getProductByCategoryId, getProductsByUsers} from "@/services/service";
 
 const Products = () => {
   const {toast} = useToast();
   const {user} = useAuth();
   const location = useLocation();
-  const {id} = location.state;
+  const id = location?.state?.id;
   console.log(id)
   const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -58,9 +58,8 @@ const Products = () => {
   }
 
   const handleGetProduct = async() => {
-    if(!id) return toast({title:"Error", description:"Id Not Found.", variant:"destructive"})
     try{
-     const res = await getProductByCategoryId(id);
+     const res = await (id ? getProductByCategoryId(id) : getProductsByUsers());
      console.log(res);
      if(res.status===200){
       setProductList(res?.data?.data)
