@@ -26,7 +26,8 @@ const Products = () => {
   const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('featured');
-  const[productList, setProductList] = useState<any>([])
+  const[productList, setProductList] = useState<any>([]);
+  
 
   const categoryFilter = searchParams.get('category');
   const searchQuery = searchParams.get('search');

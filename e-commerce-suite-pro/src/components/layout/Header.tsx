@@ -25,14 +25,17 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import Category from "@/pages/Category";
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux-toolkit/store';
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { itemCount } = useCart();
+  // const { itemCount } = useCart();
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const itemCount = useSelector((state:RootState)=> state?.cart?.items?.length);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

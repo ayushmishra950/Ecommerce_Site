@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
+import { useDispatch, useSelector } from 'react-redux';
+import { addCart, addWishList } from '@/redux-toolkit/Slice';
+import { RootState } from '@/redux-toolkit/store';
 
 interface ProductCardProps {
   product: Product;
@@ -14,10 +17,12 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   console.log(product)
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  // const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const { addToCart } = useCart();
-
+  const dispatch = useDispatch();
+  const wishList = useSelector((state:RootState)=>state?.cart?.wishList)
+   const isWishlisted = Boolean(wishList?.find((v)=>v?._id === product?._id));
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -60,7 +65,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             'absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity',
             isWishlisted && 'opacity-100'
           )}
-          onClick={() => setIsWishlisted(!isWishlisted)}
+          onClick={() => {dispatch(addWishList(product))}}
         >
           <Heart
             className={cn('h-4 w-4', isWishlisted && 'fill-destructive text-destructive')}
@@ -78,7 +83,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             className="w-full"
             size="sm"
             disabled={!product.stock}
-            onClick={() => addToCart(product)}
+            onClick={() => {dispatch(addCart(product))}}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add to Cart

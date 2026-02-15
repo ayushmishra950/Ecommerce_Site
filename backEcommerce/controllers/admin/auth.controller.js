@@ -87,7 +87,6 @@ exports.loginAdmin = async (req, res) => {
       admin = await User.findOne({email});
       if (!admin) return res.status(400).json({ message: "Invalid email." });
     }
-
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid password." });
@@ -136,18 +135,58 @@ exports.getAdmins = async (req, res) => {
   }
 };
 
+// exports.refreshToken = async (req, res) => {
+//   try {
+//     const refreshToken = req.cookies.refreshToken;
+
+//     if (!refreshToken)
+//       return res.status(401).json({ message: "No refresh token" });
+
+//     let decoded;
+
+//     try {
+//       decoded = jwt.verify(
+//         refreshToken,
+//         process.env.REFRESH_TOKEN_SECRET
+//       );
+//     } catch (err) {
+//       return res.status(403).json({ message: "Invalid refresh token" });
+//     }
+
+//     let user = await Admin.findById(decoded.id);
+//     if (!user) user = await User.findById(decoded.id);
+
+//     if (!user || user.refreshToken !== refreshToken)
+//       return res.status(403).json({ message: "Unauthorized" });
+
+//     const newAccessToken = generateAccessToken({
+//       id: user._id,
+//       role: user.role,
+//     });
+
+//     res.status(200).json({
+//       accessToken: newAccessToken,
+//     });
+
+//   } catch (error) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+
+
 exports.refreshToken = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const oldRefreshToken = req.cookies.refreshToken;
 
-    if (!refreshToken)
+    if (!oldRefreshToken)
       return res.status(401).json({ message: "No refresh token" });
 
     let decoded;
 
     try {
       decoded = jwt.verify(
-        refreshToken,
+        oldRefreshToken,
         process.env.REFRESH_TOKEN_SECRET
       );
     } catch (err) {
@@ -157,12 +196,30 @@ exports.refreshToken = async (req, res) => {
     let user = await Admin.findById(decoded.id);
     if (!user) user = await User.findById(decoded.id);
 
-    if (!user || user.refreshToken !== refreshToken)
+    if (!user || user.refreshToken !== oldRefreshToken)
       return res.status(403).json({ message: "Unauthorized" });
 
+    // 🔥 ROTATE TOKENS
     const newAccessToken = generateAccessToken({
       id: user._id,
       role: user.role,
+    });
+
+    const newRefreshToken = generateRefreshToken({
+      id: user._id,
+      role: user.role,
+    });
+
+    // Save new refresh token in DB
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    // Update cookie
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
@@ -173,6 +230,7 @@ exports.refreshToken = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 
 exports.logout = async (req, res) => {

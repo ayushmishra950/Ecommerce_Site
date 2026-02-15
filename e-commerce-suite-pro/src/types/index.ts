@@ -14,8 +14,10 @@ export interface Product {
   category: Category;
   rating: number;
   numReviews: number;
-  stock: boolean;
+  stock: number;
   variants?: ProductVariant[];
+  shopId:string;
+  isActive:boolean;
 }
 
 export interface ProductVariant {

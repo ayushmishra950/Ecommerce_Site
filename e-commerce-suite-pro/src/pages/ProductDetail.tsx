@@ -8,29 +8,33 @@ import { products } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import {getProductById} from "@/services/service";
+import { getProductById } from "@/services/service";
+import { useDispatch, useSelector } from 'react-redux';
+import { addCart, incrementQuantity, decrementQuantity } from '@/redux-toolkit/Slice';
+import { RootState } from '@/redux-toolkit/store';
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const{toast} = useToast();
+  const { toast } = useToast();
   console.log(id)
   // const product = products.find(p => p.id === id);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [product,setProduct] = useState(null);
+  const [product, setProduct] = useState(null);
   const { addToCart } = useCart();
   const [selectedImage, setSelectedImage] = useState<string | undefined>();
- const [showZoom, setShowZoom] = useState(false);
-const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+  const [showZoom, setShowZoom] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+   const dispatch = useDispatch();
+   const items = useSelector((state:RootState )=> state?.cart?.items)
 
 
 
-
-useEffect(() => {
-  if (product?.images?.length > 0) {
-    setSelectedImage(product.images[0]);
-  }
-}, [product]);
+  useEffect(() => {
+    if (product?.images?.length > 0) {
+      setSelectedImage(product.images[0]);
+    }
+  }, [product]);
 
 
   // if (!product) {
@@ -43,17 +47,17 @@ useEffect(() => {
   //     </div>
   //   );
   // }
-const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-  const rect = e.currentTarget.getBoundingClientRect();
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
 
-  const x = ((e.clientX - rect.left) / rect.width) * 100;
-  const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-  setZoomPosition({
-    x: Math.min(Math.max(x, 0), 100),
-    y: Math.min(Math.max(y, 0), 100),
-  });
-};
+    setZoomPosition({
+      x: Math.min(Math.max(x, 0), 100),
+      y: Math.min(Math.max(y, 0), 100),
+    });
+  };
 
 
 
@@ -62,28 +66,30 @@ const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     ? Math.round(((product?.originalPrice - product?.price) / product?.originalPrice) * 100)
     : 0;
 
-    
-      const handleGetProduct = async() => {
-        console.log("start...")
-        // if(!id) return toast({title:"Error", description:"Product Id Not Found.", variant:"destructive"})
-        try{
-         const res = await  getProductById(id);
-         console.log(res);
-         console.log("mediuming")
-         if(res.status===200){
-          console.log("ending")
-          setProduct(res?.data?.data)
-         }
-        }
-        catch(err){
-          console.log(err);
-        toast({title:"Error", description:err.response.data.message, variant:"destructive"})
-        }
-      };
-    
-      useEffect(()=>{
-        handleGetProduct();
-      },[])
+
+  const handleGetProduct = async () => {
+    console.log("start...")
+    // if(!id) return toast({title:"Error", description:"Product Id Not Found.", variant:"destructive"})
+    try {
+      const res = await getProductById(id);
+      console.log(res);
+      console.log("mediuming")
+      if (res.status === 200) {
+        console.log("ending")
+        setProduct(res?.data?.data)
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({ title: "Error", description: err.response.data.message, variant: "destructive" })
+    }
+  };
+
+  useEffect(() => {
+    handleGetProduct();
+  }, [])
+
+  console.log(product)
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -99,78 +105,63 @@ const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
       <div className="grid lg:grid-cols-2 gap-12">
         {/* Product Image */}
         <div className="relative">
-          {/* <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
-            <img
-              src={product?.images?.[0]}
-              alt={product?.name}
-              className="w-full h-full object-cover"
-            />
+
+          <div className="flex items-start gap-4">
+
+            {/* 🔹 Main Image */}
+            <div
+              className="relative w-[500px] h-[500px] rounded-2xl overflow-hidden bg-muted cursor-crosshair flex-shrink-0"
+              onMouseEnter={() => setShowZoom(true)}
+              onMouseLeave={() => setShowZoom(false)}
+              onMouseMove={handleMouseMove}
+            >
+              <img
+                src={selectedImage}
+                alt={product?.name}
+                className="w-full h-full object-cover"
+              />
+              {product?.discountPrice > 0 && (
+                <Badge variant="destructive" className="absolute top-4 left-4 text-lg px-3 py-1">
+                  -{product?.discountPrice}%
+                </Badge>
+              )}
+            </div>
+
+            {/* 🔹 Zoom Card (Right Side) */}
+            {showZoom && (
+              <div
+                className="w-[500px] h-[500px] rounded-2xl border shadow-2xl bg-white flex-shrink-0"
+                style={{
+                  backgroundImage: `url(${selectedImage})`,
+                  backgroundSize: "700%", // 🔥 Strong zoom
+                  backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
+            )}
+
           </div>
-          {product?.discountPrice > 0 && (
-            <Badge variant="destructive" className="absolute top-4 left-4 text-lg px-3 py-1">
-              -{product?.discountPrice}%
-            </Badge>
-          )} */}
-
-
-
-   <div className="flex items-start gap-4">
-
-  {/* 🔹 Main Image */}
-  <div
-    className="relative w-[500px] h-[500px] rounded-2xl overflow-hidden bg-muted cursor-crosshair flex-shrink-0"
-    onMouseEnter={() => setShowZoom(true)}
-    onMouseLeave={() => setShowZoom(false)}
-    onMouseMove={handleMouseMove}
-  >
-    <img
-      src={selectedImage}
-      alt={product?.name}
-      className="w-full h-full object-cover"
-    />
-     {product?.discountPrice > 0 && (
-            <Badge variant="destructive" className="absolute top-4 left-4 text-lg px-3 py-1">
-              -{product?.discountPrice}%
-            </Badge>
-          )} 
-  </div>
-
-  {/* 🔹 Zoom Card (Right Side) */}
-  {showZoom && (
-    <div
-      className="w-[500px] h-[500px] rounded-2xl border shadow-2xl bg-white flex-shrink-0"
-      style={{
-        backgroundImage: `url(${selectedImage})`,
-        backgroundSize: "700%", // 🔥 Strong zoom
-        backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
-        backgroundRepeat: "no-repeat",
-      }}
-    />
-  )}
-
-</div>
 
 
           {/* 🔹 Thumbnail Images */}
-  <div className="flex gap-3 mt-4">
-    {product?.images?.slice(0, 4).map((img: string, index: number) => (
-      <div
-        key={index}
-        onClick={() => setSelectedImage(img)}
-        className={`w-20 h-20 rounded-xl overflow-hidden cursor-pointer border-2 transition ${
-          selectedImage === img
-            ? "border-primary"
-            : "border-transparent"
-        }`}
-      >
-        <img
-          src={img}
-          alt={`thumbnail-${index}`}
-          className="w-full h-full object-cover"
-        />
-      </div>
-    ))}
-  </div>
+          <div className="flex gap-3 mt-4">
+            {product?.images?.slice(0, 4).map((img: string, index: number) => (
+              <div
+                key={index}
+                onClick={() => setSelectedImage(img)}
+                className={`w-20 h-20 rounded-xl overflow-hidden cursor-pointer border-2 transition ${selectedImage === img
+                    ? "border-primary"
+                    : "border-transparent"
+                  }`}
+              >
+                <img
+                  src={img}
+                  alt={`thumbnail-${index}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Product Info */}
@@ -232,15 +223,15 @@ const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                onClick={() => {dispatch(decrementQuantity(product?._id))}}
               >
                 <Minus className="h-4 w-4" />
               </Button>
-              <span className="w-12 text-center font-semibold">{quantity}</span>
+              <span className="w-12 text-center font-semibold">{items.find((i)=> i?._id=== product?._id)?.quantity}</span>
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setQuantity(quantity + 1)}
+                onClick={() =>{dispatch(incrementQuantity(product?._id))}}
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -252,11 +243,11 @@ const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
             <Button
               size="lg"
               className="flex-1"
-              disabled={!product?.inStock}
-              onClick={() => addToCart(product, quantity)}
+              disabled={!product?.stock}
+              onClick={() => dispatch(addCart(product))}
             >
               <ShoppingCart className="h-5 w-5 mr-2" />
-              {product?.inStock ? 'Add to Cart' : 'Out of Stock'}
+              {product?.stock ? 'Add to Cart' : 'Out of Stock'}
             </Button>
             <Button
               size="lg"
@@ -309,7 +300,7 @@ const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
               </div>
               <div className="p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">Availability</p>
-                <p className="font-medium">{product?.inStock ? 'In Stock' : 'Out of Stock'}</p>
+                <p className="font-medium">{product?.stock ? 'In Stock' : 'Out of Stock'}</p>
               </div>
             </div>
           </TabsContent>

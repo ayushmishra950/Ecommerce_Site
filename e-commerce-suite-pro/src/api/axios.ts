@@ -24,29 +24,37 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-   if (
-  (error.response?.status === 401 || error.response?.status === 403) &&
-  !originalRequest._retry
-)
- {
+    // Prevent infinite loop
+    if (
+      (error.response?.status === 401 || error.response?.status === 403) &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       try {
+        // Use axios directly to avoid interceptor loop
         const res = await axios.post(
           `${baseURL}/api/admin/auth/refreshToken`,
           {},
           { withCredentials: true }
         );
 
-        const newAccessToken = res.data.accessToken;
+        if (res.status === 200) {
+          const newAccessToken = res.data.accessToken;
+          localStorage.setItem("accessToken", newAccessToken);
 
-        localStorage.setItem("accessToken", newAccessToken);
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        return api(originalRequest);
+          // Retry original request
+          return api(originalRequest);
+        } else {
+          // Refresh token expired / invalid
+          throw new Error("Refresh token expired");
+        }
       } catch (err) {
+        // 🔥 Only redirect if refresh token is truly invalid
         localStorage.removeItem("accessToken");
+        console.log("Refresh token failed, redirecting to login");
         window.location.href = "/login";
       }
     }

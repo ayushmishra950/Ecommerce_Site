@@ -4,9 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
+import { useDispatch, useSelector } from 'react-redux';
+import {RootState} from "@/redux-toolkit/store";
+import { decrementQuantity, incrementQuantity, removeCart } from '@/redux-toolkit/Slice';
 
 const Cart = () => {
-  const { items, removeFromCart, updateQuantity, total, clearCart } = useCart();
+  const {  removeFromCart, updateQuantity, total, clearCart } = useCart();
+  const items = useSelector((state:RootState) => state?.cart?.items);
+  const dispatch = useDispatch();
+  console.log(items)
 
   if (items.length === 0) {
     return (
@@ -20,10 +26,15 @@ const Cart = () => {
       </div>
     );
   }
+    let totalPrice = 0;
+     items?.forEach((v)=>{
+      totalPrice = totalPrice + v?.totalPrice;
+     })
+     console.log(totalPrice)
 
-  const shipping = total > 100 ? 0 : 9.99;
-  const tax = total * 0.08;
-  const grandTotal = total + shipping + tax;
+  const shipping = 0;
+  const tax = totalPrice * 0.08;
+  const grandTotal = totalPrice + shipping + tax;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -33,13 +44,13 @@ const Cart = () => {
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => (
-            <Card key={item.product.id}>
+            <Card key={item._id}>
               <CardContent className="p-4">
                 <div className="flex gap-4">
                   <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                     <img
-                      src={item.product.image}
-                      alt={item.product.name}
+                      src={item.images[0]}
+                      alt={item.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -47,18 +58,21 @@ const Cart = () => {
                     <div className="flex justify-between">
                       <div>
                         <Link
-                          to={`/product/${item.product.id}`}
+                          to={`/product/${item._id}`}
                           className="font-semibold text-foreground hover:text-primary"
                         >
-                          {item.product.name}
+                          {item.name}
                         </Link>
-                        <p className="text-sm text-muted-foreground">{item.product.category}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {item?.category?.name}
+
+                        </p>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="text-muted-foreground hover:text-destructive"
-                        onClick={() => removeFromCart(item.product.id)}
+                        onClick={() => {dispatch(removeCart(item._id))}}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -69,22 +83,24 @@ const Cart = () => {
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          onClick={() => {dispatch(decrementQuantity(item._id))}}
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="w-8 text-center font-medium">{item.quantity}</span>
+                        <span className="w-8 text-center font-medium">
+                          {item?.quantity}
+                          </span>
                         <Button
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          onClick={() => {dispatch(incrementQuantity(item._id))}}
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
                       </div>
                       <p className="font-bold text-foreground">
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        ₹{item?.totalPrice} 
                       </p>
                     </div>
                   </div>
@@ -107,15 +123,15 @@ const Cart = () => {
               <div className="space-y-3">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>₹{totalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span>
+                  <span>{shipping === 0 ? 'Free' : `$${shipping}`}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>₹{tax.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -123,7 +139,7 @@ const Cart = () => {
 
               <div className="flex justify-between text-lg font-bold text-foreground mb-6">
                 <span>Total</span>
-                <span>${grandTotal.toFixed(2)}</span>
+                <span>₹{grandTotal.toFixed(2)}</span>
               </div>
 
               <Button className="w-full" size="lg" asChild>
