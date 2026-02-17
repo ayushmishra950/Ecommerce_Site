@@ -8,7 +8,7 @@ import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { addCart, addWishList } from '@/redux-toolkit/Slice';
+import { addCart, addAndRemoveWishList } from '@/redux-toolkit/Slice';
 import { RootState } from '@/redux-toolkit/store';
 
 interface ProductCardProps {
@@ -16,7 +16,6 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  console.log(product)
   // const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const { addToCart } = useCart();
@@ -65,7 +64,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             'absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity',
             isWishlisted && 'opacity-100'
           )}
-          onClick={() => {dispatch(addWishList(product))}}
+          onClick={() => {dispatch(addAndRemoveWishList(product))}}
         >
           <Heart
             className={cn('h-4 w-4', isWishlisted && 'fill-destructive text-destructive')}

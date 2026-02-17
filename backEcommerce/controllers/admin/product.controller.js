@@ -2,6 +2,7 @@ const Product = require("../../models/product.model");
 const Shop = require("../../models/shop.model");
 const Admin = require("../../models/admin.model");
 const {uploadToCloudinary} = require("../../cloudinary/uploadImageToCloudinary");
+const Category = require("../../models/category.model");
 
 
 const validateShopAndAdmin = async (shopId, adminId) => {
@@ -75,6 +76,7 @@ const createProduct = async (req, res) => {
       category
     });
 
+   await Category.findByIdAndUpdate(category, {$addToSet: {product: [product?._id]}},{new:true})
     res.status(201).json({
       success: true,
       message: "Product created successfully",

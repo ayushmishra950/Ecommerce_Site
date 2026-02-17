@@ -38,13 +38,13 @@ api.interceptors.response.use(
           {},
           { withCredentials: true }
         );
-
+    console.log(res)
         if (res.status === 200) {
           const newAccessToken = res.data.accessToken;
           localStorage.setItem("accessToken", newAccessToken);
 
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
+    
           // Retry original request
           return api(originalRequest);
         } else {

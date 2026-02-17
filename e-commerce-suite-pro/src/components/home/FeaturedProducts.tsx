@@ -3,9 +3,25 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/products/ProductCard';
 import { products } from '@/data/products';
+import { useToast } from '@/hooks/use-toast';
+import {getProductsByUsers} from "@/services/service";
+import { useEffect, useState } from 'react';
 
 export const FeaturedProducts = () => {
-  const featuredProducts = products.slice(0, 4);
+  const {toast} = useToast();
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const handleGetProduct = async() => {
+     try{
+        const res = await getProductsByUsers();
+                setFeaturedProducts(res?.data?.data);
+     }
+     catch(err){
+      toast({title:"Error Product.", description:err?.response?.data?.message|| err?.message, variant:"destructive"})
+     }
+  }
+  useEffect(()=>{
+    handleGetProduct()
+  },[])
 
   return (
     <section className="py-16 bg-background">
@@ -24,8 +40,8 @@ export const FeaturedProducts = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {featuredProducts?.map((product) => (
+            <ProductCard key={product._id} product={product} />
           ))}
         </div>
       </div>

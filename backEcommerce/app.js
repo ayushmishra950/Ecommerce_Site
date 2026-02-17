@@ -1,6 +1,7 @@
 const express = require("express");
 const setupSwagger = require("./swagger/swagger");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const {connectDB} = require("./config/db");
 const {protect} = require("./middlewares/auth.middleware")
 
@@ -31,6 +32,7 @@ connectDB();
 
 // Body parser
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors({origin :"http://localhost:8080", credentials : true}))
 setupSwagger(app);
 

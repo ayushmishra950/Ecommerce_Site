@@ -76,17 +76,38 @@ const cartSlice = createSlice({
             }
         },
 
-    addWishList:(state, action:PayloadAction<CartItem>)=>{
-        const item = state?.wishList?.find((v)=> v?._id === action?.payload?._id);
-        if(item){
-       showToast( "Already in Wishlist", "This product is already saved in your wishlist. You can view it anytime.", "info")
-        }
-        else{
-            state.wishList.push({...action.payload, quantity:1, totalPrice:action?.payload?.price})
-        }
-    } 
+  addAndRemoveWishList: (state, action: PayloadAction<CartItem>) => {
+
+    const index = state.wishList.findIndex(
+        (item) => item._id === action.payload._id
+    );
+
+    if (index !== -1) {
+        // REMOVE
+        state.wishList.splice(index, 1);
+
+        showToast(
+            "Wishlist Item Removed.",
+            "This product has been removed from your wishlist.",
+            "info"
+        );
+    } else {
+        // ADD
+        state.wishList.push({
+            ...action.payload,
+            quantity: 0,
+            totalPrice: action.payload.price
+        });
+
+        showToast(
+            "Wishlist Item Added.",
+            "This product is saved in your wishlist.",
+            "success"
+        );
+    }
+},
     }
 })
 
-export const { addCart, removeCart,addWishList,  incrementQuantity, decrementQuantity } = cartSlice.actions;
+export const { addCart, removeCart,addAndRemoveWishList,  incrementQuantity, decrementQuantity } = cartSlice.actions;
 export default cartSlice.reducer;

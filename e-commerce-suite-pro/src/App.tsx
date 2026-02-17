@@ -2,14 +2,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider} from "@/context/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 
 // Layouts
 import { UserLayout } from "@/components/layout/UserLayout";
 import AdminLayout from "@/pages/admin/AdminLayout";
 import SuperAdminLayout from "@/pages/superadmin/SuperAdminLayout";
+import { useAuth } from "@/context/AuthContext";
 
 // User Pages
 import Index from "./pages/Index";
@@ -22,7 +23,8 @@ import NotFound from "./pages/NotFound";
 import WishlistPage from "./pages/WishlistPage";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
-
+import OrdersPage from "./pages/OrdersPage";
+import UserSettings from "./pages/UserSettings";
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -39,6 +41,11 @@ import RoleRoute from "@/routes/RoleRoute";
 
 const queryClient = new QueryClient();
 
+const HomeRoute = () => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Index /> : <Navigate to="/login" />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -50,13 +57,15 @@ const App = () => (
             <Routes>
               {/* User Routes */}
               <Route element={<UserLayout />}>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<HomeRoute />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/wishlist" element={<WishlistPage />} />
-                 <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/ordersuccess" element={<OrderSuccess />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/ordersuccess" element={<OrderSuccess />} />
+                <Route path="/orderpage" element={<OrdersPage />} />
+                <Route path="/user/settings" element={<UserSettings />} />
               </Route>
 
               {/* Auth Routes */}
@@ -65,26 +74,26 @@ const App = () => (
 
               {/* Admin Routes */}
               <Route element={<RoleRoute allowedRoles={["admin"]} />}>
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="products" element={<AdminProducts />} />
-                <Route path="orders" element={<AdminOrders />} />
-                <Route path="customers" element={<AdminCustomers />} />
-                <Route path="categories" element={<AdminCategories />} />
-                <Route path="settings" element={<AdminSettings />} />
-              </Route>
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="products" element={<AdminProducts />} />
+                  <Route path="orders" element={<AdminOrders />} />
+                  <Route path="customers" element={<AdminCustomers />} />
+                  <Route path="categories" element={<AdminCategories />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                </Route>
               </Route>
 
               {/* Super Admin Routes */}
               <Route element={<RoleRoute allowedRoles={["superadmin"]} />}>
-              <Route path="/superadmin" element={<SuperAdminLayout />}>
-                <Route index element={<SuperAdminDashboard />} />
-                <Route path="admins" element={<AdminManagement />} />
-                <Route path="roles" element={<RolesPermissions />} />
-                <Route path="activity" element={<SuperAdminDashboard />} />
-                <Route path="platform" element={<SuperAdminDashboard />} />
-                <Route path="reports" element={<SuperAdminDashboard />} />
-              </Route>
+                <Route path="/superadmin" element={<SuperAdminLayout />}>
+                  <Route index element={<SuperAdminDashboard />} />
+                  <Route path="admins" element={<AdminManagement />} />
+                  <Route path="roles" element={<RolesPermissions />} />
+                  <Route path="activity" element={<SuperAdminDashboard />} />
+                  <Route path="platform" element={<SuperAdminDashboard />} />
+                  <Route path="reports" element={<SuperAdminDashboard />} />
+                </Route>
               </Route>
 
               {/* Catch-all */}
@@ -98,3 +107,6 @@ const App = () => (
 );
 
 export default App;
+
+
+

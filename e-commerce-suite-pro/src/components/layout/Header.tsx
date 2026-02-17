@@ -35,7 +35,7 @@ export const Header = () => {
   // const { itemCount } = useCart();
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const itemCount = useSelector((state:RootState)=> state?.cart?.items?.length);
+  const itemCount = useSelector((state: RootState) => state?.cart?.items?.length);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,12 +71,11 @@ export const Header = () => {
                 onMouseEnter={() => setIsOpen(true)}
                 onMouseLeave={() => setIsOpen(false)}
               >
-                <Link
-                  to="/category"
+                <span
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Categories
-                </Link>
+                </span>
 
                 {isOpen && (
                   <div className="absolute top-full left-0 z-50">
@@ -137,7 +136,7 @@ export const Header = () => {
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link to="/orders" className="cursor-pointer">
+                      <Link to="/orderpage" className="cursor-pointer">
                         <Package className="mr-2 h-4 w-4" />
                         Orders
                       </Link>

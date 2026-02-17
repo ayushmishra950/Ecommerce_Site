@@ -178,6 +178,7 @@ exports.getAdmins = async (req, res) => {
 exports.refreshToken = async (req, res) => {
   try {
     const oldRefreshToken = req.cookies.refreshToken;
+    console.log(oldRefreshToken)
 
     if (!oldRefreshToken)
       return res.status(401).json({ message: "No refresh token" });
@@ -221,6 +222,7 @@ exports.refreshToken = async (req, res) => {
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
 
     res.status(200).json({
       accessToken: newAccessToken,

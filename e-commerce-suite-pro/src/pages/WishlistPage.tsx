@@ -1,80 +1,430 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux-toolkit/store";
-// import { removeFromWishlist, clearWishlist } from "@/redux-toolkit/WishlistSlice";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  Trash2,
+  ShoppingCart,
+  Heart,
+  Search,
+  Filter,
+  Share2,
+  Star,
+  ArrowLeft,
+  Package,
+  Sparkles,
+  Check,
+  X,
+  Grid3x3,
+  List,
+  TrendingUp,
+  Gift,
+  BadgePercent
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { addAndRemoveWishList, addCart } from "@/redux-toolkit/Slice";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const WishlistPage = () => {
-  const wishlistItems = useSelector((state: RootState) => state.cart.items);
+  const wishlistItems = useSelector((state: RootState) => state.cart.wishList);
   const dispatch = useDispatch();
-//   const [wishlistItems, setWishListItems] = useState([]);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high'>('name');
+
+  // Filter and sort items
+  const filteredItems = wishlistItems
+    .filter((item) =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'price-low':
+          return a.price - b.price;
+        case 'price-high':
+          return b.price - a.price;
+        case 'name':
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
+
+  const handleRemoveFromWishlist = (item: any) => {
+    dispatch(addAndRemoveWishList(item));
+    toast({
+      title: "Removed from Wishlist",
+      description: `${item.name} has been removed from your wishlist`,
+      variant: "destructive",
+    });
+  };
+
+  const handleAddToCart = (item: any) => {
+    dispatch(addCart(item));
+    toast({
+      title: "Added to Cart! 🛒",
+      description: `${item.name} has been added to your cart`,
+    });
+  };
+
+  const handleMoveToCart = (item: any) => {
+    dispatch(addCart(item));
+    dispatch(addAndRemoveWishList(item));
+    toast({
+      title: "Moved to Cart! 🛒",
+      description: `${item.name} has been moved from wishlist to cart`,
+    });
+  };
+
+  const calculateDiscount = (item: any) => {
+    if (item.originalPrice && item.originalPrice > item.price) {
+      return Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100);
+    }
+    return 0;
+  };
+
+  const totalValue = wishlistItems.reduce((acc, item) => acc + item.price, 0);
+  const totalSavings = wishlistItems.reduce((acc, item) => {
+    const original = item.price;
+    return acc + (original - item.price);
+  }, 0);
 
   if (wishlistItems.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-3xl font-bold mb-4">Your Wishlist is Empty</h1>
-        <p className="text-muted-foreground mb-6">Looks like you haven't added any products yet.</p>
-        <Button asChild>
-          <Link to="/products">Browse Products</Link>
-        </Button>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="relative mb-8">
+            <Heart className="h-24 w-24 mx-auto text-gray-300" />
+            <Sparkles className="h-8 w-8 text-pink-400 absolute top-0 right-1/3 animate-pulse" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">Your Wishlist is Empty</h1>
+          <p className="text-gray-600 mb-8 text-lg">
+            Save your favorite items here and never lose track of what you love!
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button
+              size="lg"
+              asChild
+              className="bg-gradient-to-r from-pink-600 to-red-500 hover:from-pink-500 hover:to-red-400"
+            >
+              <Link to="/products">
+                <Heart className="mr-2 h-5 w-5" />
+                Discover Products
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link to="/">
+                <ArrowLeft className="mr-2 h-5 w-5" />
+                Home
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <h1 className="text-3xl font-bold mb-8">My Wishlist</h1>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                <Heart className="h-10 w-10 text-pink-600 fill-pink-600" />
+                My Wishlist
+              </h1>
+              <p className="text-gray-600">
+                {wishlistItems.length} {wishlistItems.length === 1 ? 'item' : 'items'} saved
+              </p>
+            </div>
+            <Button variant="outline" asChild>
+              <Link to="/products">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Continue Shopping
+              </Link>
+            </Button>
+          </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {wishlistItems.map((item) => (
-          <Card key={item._id}>
-            <CardContent className="p-4">
-              <div className="flex gap-4">
-                <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                  <img
-                    src={item.images[0]}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="bg-pink-100 rounded-lg p-3">
+                  <Heart className="h-6 w-6 text-pink-600" />
                 </div>
-
-                <div className="flex-1">
-                  <div className="flex justify-between">
-                    <div>
-                      <Link
-                        to={`/product/${item._id}`}
-                        className="font-semibold text-foreground hover:text-primary"
-                      >
-                        {item.name}
-                      </Link>
-                      <p className="text-sm text-muted-foreground">{item.category.name}</p>
-                      <p className="font-bold text-foreground mt-1">₹{item.price}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive"
-                    //   onClick={() => dispatch(removeFromWishlist(item._id))}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Items</p>
+                  <p className="text-2xl font-bold text-gray-900">{wishlistItems.length}</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-100 rounded-lg p-3">
+                  <TrendingUp className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Value</p>
+                  <p className="text-2xl font-bold text-gray-900">₹{totalValue.toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="bg-green-100 rounded-lg p-3">
+                  <BadgePercent className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">You Save</p>
+                  <p className="text-2xl font-bold text-green-600">₹{totalSavings.toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      <div className="mt-6 flex justify-end">
-        <Button variant="outline" 
-        // onClick={() => dispatch(clearWishlist())}
-        >
-          Clear Wishlist
-        </Button>
+          {/* Search and Filters */}
+          <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search in wishlist..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                />
+              </div>
+
+              {/* Sort */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+              >
+                <option value="name">Sort by Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+
+              {/* View Mode */}
+              <div className="flex gap-2">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="icon"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <Grid3x3 className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="icon"
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Share */}
+              <Button variant="outline" className="flex items-center gap-2">
+                <Share2 className="h-4 w-4" />
+                Share Wishlist
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Wishlist Items */}
+        {filteredItems.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12 text-center">
+            <Search className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No items found</h3>
+            <p className="text-gray-600">Try adjusting your search to find what you're looking for</p>
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "grid gap-6",
+              viewMode === 'grid' ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
+            )}
+          >
+            {filteredItems.map((item) => {
+              const discount = calculateDiscount(item);
+              const isInStock = item.stock > 0;
+
+              return (
+                <div
+                  key={item._id}
+                  className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all group"
+                >
+                  {/* Product Image */}
+                  <div className="relative">
+                    <Link to={`/product/${item._id}`} className="block">
+                      <div className={cn(
+                        "overflow-hidden bg-gray-100",
+                        viewMode === 'grid' ? "aspect-square" : "h-48"
+                      )}>
+                        <img
+                          src={item.images[0]}
+                          alt={item.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                        />
+                      </div>
+                    </Link>
+
+                    {/* Discount Badge */}
+                    {discount > 0 && (
+                      <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-red-500 text-white px-3 py-1 rounded-full font-bold text-sm shadow-lg">
+                        -{discount}% OFF
+                      </div>
+                    )}
+
+                    {/* Stock Badge */}
+                    {!isInStock && (
+                      <div className="absolute top-4 right-4 bg-gray-900 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        Out of Stock
+                      </div>
+                    )}
+
+                    {/* Remove Button */}
+                    <button
+                      onClick={() => handleRemoveFromWishlist(item)}
+                      className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg hover:bg-red-50 transition-colors group/btn"
+                    >
+                      <Heart className="h-5 w-5 text-pink-600 fill-pink-600 group-hover/btn:text-red-600" />
+                    </button>
+                  </div>
+
+                  {/* Product Details */}
+                  <div className="p-6">
+                    <div className="mb-3">
+                      <Link to={`/product/${item._id}`}>
+                        <h3 className="font-bold text-gray-900 text-lg mb-1 hover:text-pink-600 transition-colors line-clamp-2">
+                          {item.name}
+                        </h3>
+                      </Link>
+                      <p className="text-sm text-gray-600">{item.category?.name || 'General'}</p>
+                    </div>
+
+                    {/* Rating */}
+                    <div className="flex items-center gap-1 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={cn(
+                            'w-4 h-4',
+                            i < Math.floor(item.rating || 4)
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-gray-300'
+                          )}
+                        />
+                      ))}
+                      <span className="text-sm text-gray-600 ml-1">
+                        ({item.rating || 4.0})
+                      </span>
+                    </div>
+
+                    {/* Price */}
+                    <div className="flex items-baseline gap-2 mb-4">
+                      <span className="text-2xl font-bold text-gray-900">
+                        ₹{item.price.toLocaleString()}
+                      </span>
+                      {/* {item.originalPrice && item.originalPrice > item.price && ( */}
+                      <span className="text-sm text-gray-500 line-through">
+                        {/* ₹{item.originalPrice.toLocaleString()} */}
+                      </span>
+                      {/* )} */}
+                    </div>
+
+                    {/* Stock Info */}
+                    {isInStock && item.stock < 10 && (
+                      <p className="text-xs text-orange-600 font-semibold mb-3 flex items-center gap-1">
+                        <Package className="w-3 h-3" />
+                        Only {item.stock} left in stock!
+                      </p>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <Button
+                        className="flex-1 bg-gradient-to-r from-pink-600 to-red-500 hover:from-pink-500 hover:to-red-400"
+                        onClick={() => handleMoveToCart(item)}
+                        disabled={!isInStock}
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Move to Cart
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleRemoveFromWishlist(item)}
+                        className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {wishlistItems.length > 0 && (
+          <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <Gift className="h-8 w-8 text-pink-600" />
+                <div>
+                  <h3 className="font-bold text-gray-900">Ready to checkout?</h3>
+                  <p className="text-sm text-gray-600">
+                    Move all items to cart and complete your purchase
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    wishlistItems.forEach(item => dispatch(addAndRemoveWishList(item)));
+                    toast({
+                      title: "Wishlist Cleared",
+                      description: "All items have been removed from your wishlist",
+                    });
+                  }}
+                  className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Clear All
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-pink-600 to-red-500 hover:from-pink-500 hover:to-red-400"
+                  onClick={() => {
+                    wishlistItems.forEach(item => {
+                      if (item.stock > 0) {
+                        dispatch(addCart(item));
+                      }
+                    });
+                    toast({
+                      title: "Added to Cart! 🛒",
+                      description: `All available items have been added to your cart`,
+                    });
+                    navigate('/cart');
+                  }}
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Add All to Cart
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
