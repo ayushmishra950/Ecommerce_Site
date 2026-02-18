@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/redux-toolkit/store";
+import { RootState } from "@/redux-toolkit/store/store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,18 +23,20 @@ import {
   BadgePercent
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { addAndRemoveWishList, addCart } from "@/redux-toolkit/Slice";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useAppDispatch, useAppSelector } from "@/redux-toolkit/hooks/hook";
+import { addToCart,removeFromCart } from '@/redux-toolkit/slice/cartSlice';
+import { addAndRemoveWishList } from '@/redux-toolkit/slice/wishListSlice';
 
 const WishlistPage = () => {
-  const wishlistItems = useSelector((state: RootState) => state.cart.wishList);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high'>('name');
+  const wishlistItems = useAppSelector((state) => state?.wishList?.wishList);
 
   // Filter and sort items
   const filteredItems = wishlistItems
@@ -63,7 +65,7 @@ const WishlistPage = () => {
   };
 
   const handleAddToCart = (item: any) => {
-    dispatch(addCart(item));
+    dispatch(addToCart(item));
     toast({
       title: "Added to Cart! 🛒",
       description: `${item.name} has been added to your cart`,
@@ -71,7 +73,7 @@ const WishlistPage = () => {
   };
 
   const handleMoveToCart = (item: any) => {
-    dispatch(addCart(item));
+    dispatch(addToCart(item));
     dispatch(addAndRemoveWishList(item));
     toast({
       title: "Moved to Cart! 🛒",
@@ -408,7 +410,7 @@ const WishlistPage = () => {
                   onClick={() => {
                     wishlistItems.forEach(item => {
                       if (item.stock > 0) {
-                        dispatch(addCart(item));
+                        dispatch(addToCart(item));
                       }
                     });
                     toast({

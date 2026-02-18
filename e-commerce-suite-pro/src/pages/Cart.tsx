@@ -21,10 +21,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useCart } from '@/context/CartContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from "@/redux-toolkit/store";
-import { decrementQuantity, incrementQuantity, removeCart } from '@/redux-toolkit/Slice';
+import { RootState } from "@/redux-toolkit/store/store";
+import { decrementQuantity, incrementQuantity, removeFromCart, clearCart } from '@/redux-toolkit/slice/cartSlice';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -58,8 +57,7 @@ const recommendedProducts = [
 ];
 
 const Cart = () => {
-  const { removeFromCart, updateQuantity, total, clearCart } = useCart();
-  const items = useSelector((state: RootState) => state?.cart?.items);
+  const items = useSelector((state: RootState) => state?.cart?.cartList);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -128,7 +126,7 @@ const Cart = () => {
 
   const saveForLater = (item: any) => {
     setSavedItems([...savedItems, item]);
-    dispatch(removeCart(item._id));
+    dispatch(removeFromCart(item._id));
     toast({
       title: "Saved for Later",
       description: `${item.name} has been moved to saved items`,
@@ -145,7 +143,7 @@ const Cart = () => {
   };
 
   const handleClearCart = () => {
-    // dispatch(clearAllCart());
+    dispatch(clearCart());
     toast({
       title: "Cart Cleared",
       description: "All items have been removed from your cart",
@@ -267,7 +265,7 @@ const Cart = () => {
                             size="icon"
                             className="text-gray-400 hover:text-red-600 hover:bg-red-50 -mt-1"
                             onClick={() => {
-                              dispatch(removeCart(item._id));
+                              dispatch(removeFromCart(item._id));
                               toast({
                                 title: "Item Removed",
                                 description: `${item.name} has been removed from cart`,

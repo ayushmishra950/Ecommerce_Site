@@ -4,21 +4,6 @@ interface Category{
   name:string;
   description:string;
 }
-export interface Product {
-  _id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  description: string;
-  images: string[];
-  category: Category;
-  rating: number;
-  numReviews: number;
-  stock: number;
-  variants?: ProductVariant[];
-  shopId:string;
-  isActive:boolean;
-}
 
 export interface ProductVariant {
   id: string;
@@ -73,3 +58,36 @@ export interface AdminStats {
   recentOrders: Order[];
   salesData: { month: string; sales: number }[];
 }
+
+
+
+export interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  description: string;
+  images: string[];
+  category: Category;
+  rating: number;
+  numReviews: number;
+  stock: number;
+  variants?: ProductVariant[];
+  shopId:string;
+  isActive:boolean;
+}
+
+export interface CartItem {
+    _id?: string;
+    name: string;
+    description: string;
+    stock: number;
+    price: number;
+    rating: number;
+    category: Category;
+    numReviews: number;
+    isActive: boolean;
+    shopId: string;
+    images: string[];
+}
+

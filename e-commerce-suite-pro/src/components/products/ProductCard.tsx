@@ -5,26 +5,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types';
-import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
-import { useDispatch, useSelector } from 'react-redux';
-import { addCart, addAndRemoveWishList } from '@/redux-toolkit/Slice';
-import { RootState } from '@/redux-toolkit/store';
+import { addToCart,removeFromCart } from '@/redux-toolkit/slice/cartSlice';
+import { addAndRemoveWishList } from '@/redux-toolkit/slice/wishListSlice';
+import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
 
-interface ProductCardProps {
-  product: Product;
-}
 
-export const ProductCard = ({ product }: ProductCardProps) => {
+export const ProductCard = ({ product }) => {
   // const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const { addToCart } = useCart();
-  const dispatch = useDispatch();
-  const wishList = useSelector((state:RootState)=>state?.cart?.wishList)
-   const isWishlisted = Boolean(wishList?.find((v)=>v?._id === product?._id));
+  const dispatch = useAppDispatch();
+  
+    const wishList = useAppSelector((state) => state?.wishList?.wishList);
+  const isWishlisted = Boolean(wishList?.find((v) => v?._id === product?._id));
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
+
+    if(!product) return null;
 
   return (
     <Card
@@ -64,7 +62,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             'absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity',
             isWishlisted && 'opacity-100'
           )}
-          onClick={() => {dispatch(addAndRemoveWishList(product))}}
+          onClick={() => { dispatch(addAndRemoveWishList(product)) }}
         >
           <Heart
             className={cn('h-4 w-4', isWishlisted && 'fill-destructive text-destructive')}
@@ -82,7 +80,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             className="w-full"
             size="sm"
             disabled={!product.stock}
-            onClick={() => {dispatch(addCart(product))}}
+            onClick={() => { dispatch(addToCart(product)) }}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add to Cart

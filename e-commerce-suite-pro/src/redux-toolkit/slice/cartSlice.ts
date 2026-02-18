@@ -1,0 +1,56 @@
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {CartItem } from "@/types";
+
+ interface CartQuantity extends CartItem {
+    quantity: number;
+    totalPrice: number;
+}
+ interface Carts {
+    cartList: CartQuantity[];
+}
+
+const initialState: Carts = {
+    cartList: []
+};
+
+
+const cartSlice = createSlice({
+    name: "cart",
+    initialState,
+    reducers: {
+        addToCart: (state, action: PayloadAction<CartItem>) => {
+            const item = state.cartList.find((v) => v._id === action.payload._id);
+            if (item) {
+                item.quantity += 1;
+                item.totalPrice = item.price * item.quantity;
+            } else {
+                state.cartList.push({ ...action.payload, quantity: 1, totalPrice: action.payload.price });
+            }
+        },
+        removeFromCart: (state, action: PayloadAction<string>) => {
+            state.cartList = state.cartList.filter((item) => item._id !== action.payload);
+        },
+        clearCart: (state) => {
+            state.cartList = [];
+        },
+
+        incrementQuantity: (state, action: PayloadAction<string>) => {
+            const item = state.cartList.find((v) => v._id === action.payload);
+            if (item) {
+                item.quantity += 1;
+                item.totalPrice = item.price * item.quantity;
+            }
+        },
+        decrementQuantity: (state, action: PayloadAction<string>) => {
+            const item = state.cartList.find((v) => v._id === action.payload);
+            if (item && item.quantity > 1) {
+                item.quantity -= 1;
+                item.totalPrice = item.price * item.quantity;
+            }
+        },
+
+    },
+});
+
+export const { addToCart, removeFromCart, clearCart, incrementQuantity, decrementQuantity } = cartSlice.actions;
+export default cartSlice.reducer;

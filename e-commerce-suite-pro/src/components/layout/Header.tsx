@@ -26,7 +26,7 @@ import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import Category from "@/pages/Category";
 import { useSelector } from 'react-redux';
-import { RootState } from '@/redux-toolkit/store';
+import { RootState } from '@/redux-toolkit/store/store';
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -142,7 +142,7 @@ export const Header = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/profile" className="cursor-pointer">
+                      <Link to="/setting" className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                       </Link>

@@ -34,9 +34,8 @@ import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { getProductById } from "@/services/service";
-import { useDispatch, useSelector } from 'react-redux';
-import { addCart, incrementQuantity, decrementQuantity } from '@/redux-toolkit/Slice';
-import { RootState } from '@/redux-toolkit/store';
+import { addToCart, incrementQuantity, decrementQuantity } from '@/redux-toolkit/slice/cartSlice';
+import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
 
 // Dummy Reviews Data
 const dummyReviews = [
@@ -125,15 +124,15 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [product, setProduct] = useState(null);
-  const { addToCart } = useCart();
+  // const { addToCart } = useCart();
   const [selectedImage, setSelectedImage] = useState<string | undefined>();
   const [showZoom, setShowZoom] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  const dispatch = useDispatch();
-  const items = useSelector((state: RootState) => state?.cart?.items);
+  const dispatch = useAppDispatch();
+  const items = useAppSelector((state) => state?.cart?.cartList);
 
   useEffect(() => {
     if (product?.images?.length > 0) {
@@ -277,8 +276,8 @@ const ProductDetail = () => {
                     key={index}
                     onClick={() => setSelectedImage(img)}
                     className={`aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all transform hover:scale-105 ${selectedImage === img
-                        ? "border-blue-600 ring-2 ring-blue-200"
-                        : "border-gray-200 hover:border-blue-300"
+                      ? "border-blue-600 ring-2 ring-blue-200"
+                      : "border-gray-200 hover:border-blue-300"
                       }`}
                   >
                     <img
@@ -445,7 +444,7 @@ const ProductDetail = () => {
                   className="flex-1 h-14 text-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transition-all transform hover:scale-105 shadow-lg shadow-blue-500/30"
                   disabled={!product?.stock}
                   onClick={() => {
-                    dispatch(addCart(product));
+                    dispatch(addToCart(product));
                     toast({
                       title: "Added to Cart!",
                       description: `${product?.name} has been added to your cart.`,
