@@ -53,7 +53,7 @@ app.use("/api/admin/coupon",protect, adminCouponRoutes);
 app.use("/api/admin/category",protect, adminCategoryRoutes);
 app.use("/api/admin/user",protect, adminUserRoutes);
 // Super Admin Routes
-app.use("/api/superadmin/shop",protect, superAdminShopRoute);
+app.use("/api/superadmin/shop", superAdminShopRoute);
 
 
 

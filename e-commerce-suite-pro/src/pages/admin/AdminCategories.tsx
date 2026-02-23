@@ -13,6 +13,8 @@ import { getCategory, deleteCategory, categoryStatus } from "@/services/service"
 import { formatDate } from "@/services/allFunction";
 import DeleteModal from "@/card/DeleteModal";
 import {getStatusVariant} from "@/services/allFunction";
+import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
+import { getCategoryList } from '@/redux-toolkit/slice/categorySlice';
 
 const AdminCategories = () => {
   const { user } = useAuth();
@@ -21,11 +23,13 @@ const AdminCategories = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isOpen, setIsOpen] = useState(false);
   const [initialData, setInitialData] = useState(null);
-  const [categoryList, setCategoryList] = useState<any>([]);
+  // const [categoryList, setCategoryList] = useState<any>([]);
   const [categoryListRefresh, setCategoryListRefresh] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-  const [isDeleteLoading, setIsDeleteLoading] = useState(false)
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const categoryList = useAppSelector((state)=> state?.category?.categoryList);
 
   const filteredCategories = categoryList.filter((category) => {
     const matchesSearch = category.name
@@ -88,7 +92,7 @@ const AdminCategories = () => {
     let obj = { userId: user?.id, shopId: user?.shopId }
     try {
       const res = await getCategory(obj);
-      setCategoryList(res?.data?.data);
+      dispatch(getCategoryList(res.data.data));
       setCategoryListRefresh(false);
     }
     catch (err) {
@@ -98,7 +102,9 @@ const AdminCategories = () => {
   };
 
   useEffect(() => {
-    handleGetCategory();
+    if(categoryList?.length===0 || categoryListRefresh){
+   handleGetCategory();
+    } 
   }, [categoryListRefresh]);
 
   return (

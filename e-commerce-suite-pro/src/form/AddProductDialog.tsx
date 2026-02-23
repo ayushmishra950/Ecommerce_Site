@@ -8,17 +8,21 @@ import { Loader2, X } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { useToast } from "@/hooks/use-toast"
 import { addProduct, updateProduct, getCategory } from "@/services/service";
+import AddCategoryDialog from "./AddCategoryDialog"
+import { useAppDispatch, useAppSelector } from "@/redux-toolkit/hooks/hook"
+import { getCategoryList } from "@/redux-toolkit/slice/categorySlice"
 
 type FormChangeEvent = | React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>
 
 const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefresh }) => {
     const { user } = useAuth()
     const { toast } = useToast()
-
+      const [isOpen, setIsOpen] = useState(false);
+     const [categoryListRefresh, setCategoryListRefresh] = useState(false);
     const [loading, setLoading] = useState(false)
     const [imagePreviews, setImagePreviews] = useState([])
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const [categoryList, setCategoryList] = useState<any>([]);
+    // const [categoryList, setCategoryList] = useState<any>([]);
     const [formData, setFormData] = useState({
         name: "",
         category: "",
@@ -28,6 +32,8 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
         images: [], // 👈 array
         isActive:false
     })
+   const dispatch = useAppDispatch();
+   const categoryList = useAppSelector((state)=> state?.category?.categoryList);
 
     const isEdit = Boolean(initialData);
 
@@ -121,7 +127,7 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
             });
 
             const res = isEdit ? await updateProduct(payload, initialData?._id) : await addProduct(payload)
-      console.log(res)
+            console.log(res)
             if (res.status === 200 || res.status === 201) {
                 toast({ title: isEdit ? "Update Product" : "Add Product", description: res.data.message});
             }
@@ -142,7 +148,8 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
         let obj = { userId: user?.id, shopId: user?.shopId }
         try {
             const res = await getCategory(obj);
-            setCategoryList(res?.data?.data);
+            // setCategoryList(res?.data?.data);
+            dispatch(getCategoryList(res.data.data))
         }
         catch (err) {
             console.log(err);
@@ -151,10 +158,14 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
     };
 
     useEffect(() => {
+      if(categoryList.length===0|| categoryListRefresh){
         handleGetCategory();
-    }, []);
+      }
+    }, [categoryListRefresh, categoryList.length]);
 
     return (
+      <>
+      <AddCategoryDialog isOpen={isOpen} onClose={() => { setIsOpen(false) }} initialData={null} setCategoryListRefresh={setCategoryListRefresh} />
         <Dialog open={open} onOpenChange={(open) => { resetForm(); onOpenChange(open); }}>
   <DialogContent className="max-w-md p-4">
     <DialogHeader className="mb-2">
@@ -323,7 +334,7 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
     </form>
   </DialogContent>
 </Dialog>
-
+</>
     )
 }
 

@@ -36,12 +36,6 @@ exports.registerAdmin = async (req, res) => {
       return res.status(404).json({ message: "Shop not found." });
     }
 
-    // 3️⃣ Check if shop already has an admin
-    const existingAdmin = await Admin.findOne({ shopId });
-    if (existingAdmin) {
-      return res.status(400).json({ message: "This shop already has an admin." });
-    }
-
     // 4️⃣ Check if email already exists for this shop
     const emailTaken = await Admin.findOne({ email, shopId });
     if (emailTaken) {
@@ -80,6 +74,7 @@ exports.registerAdmin = async (req, res) => {
 exports.loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(req.body)
     if(!email || !password) return res.status(400).json({ success: false, message: "Email and password are required."});
 
     let admin = await Admin.findOne({ email });
@@ -99,7 +94,7 @@ exports.loginAdmin = async (req, res) => {
 
 const accessToken = generateAccessToken(payload);
 const refreshToken = generateRefreshToken(payload);
-
+  console.log(accessToken, refreshToken)
 
     // Save refresh token in DB (Recommended)
     admin.refreshToken = refreshToken;
@@ -108,7 +103,7 @@ const refreshToken = generateRefreshToken(payload);
       admin.lastLogin = new Date();
     }
     await admin.save();
-
+    console.log("admin", admin)
     // 🔐 Store Refresh Token in HttpOnly Cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
