@@ -35,7 +35,7 @@ export const Header = () => {
   // const { itemCount } = useCart();
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const itemCount = useSelector((state: RootState) => state?.cart?.items?.length);
+  const itemCount = useSelector((state: RootState) => state?.cart?.cartList?.length);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

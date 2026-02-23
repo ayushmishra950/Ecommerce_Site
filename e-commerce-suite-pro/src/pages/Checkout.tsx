@@ -19,7 +19,7 @@ interface ShippingAddress {
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const items = useSelector((state: RootState) => state.cart.items);
+  const items = useSelector((state: RootState) => state.cart.cartList);
 
   const [shipping, setShipping] = useState<ShippingAddress>({
     fullName: "",
@@ -65,7 +65,7 @@ const Checkout = () => {
     console.log("Order Items:", items);
 
     alert("Order Placed Successfully!");
-    navigate("/");
+    navigate("/ordersuccess");
   };
 
   if (items.length === 0) {

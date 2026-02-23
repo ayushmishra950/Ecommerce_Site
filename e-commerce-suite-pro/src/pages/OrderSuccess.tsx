@@ -14,7 +14,7 @@ const OrderSuccess: React.FC = () => {
         <Link to="/" className="block">
           <Button>Continue Shopping</Button>
         </Link>
-        <Link to="/orders" className="block">
+        <Link to="/orderpage" className="block">
           <Button variant="outline">View My Orders</Button>
         </Link>
       </div>

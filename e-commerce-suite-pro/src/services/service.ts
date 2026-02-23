@@ -113,8 +113,35 @@ export const getProductById = async(id:string) =>{
     return res;
 }
 
+
 export const getProductsByUsers = async() =>{
     const res = await api.get(`/api/user/product`);
     return res;
 }
+
+export const addProductToWishlist = async(id : string, userId:string) =>{
+    console.log(id, userId)
+    const res = await api.post(`/api/user/wishlist/add`, {userId:userId, productId:id});
+    return res;
+}
+
+
+export const getProductToWishlist = async(id : string, userId:string) =>{
+    const res = await api.get(`/api/user/wishlist/get`);
+    return res;
+}
+
+
+export const removeProductToWishlist = async(id : string, userId:string) =>{
+    const res = await api.get(`/api/user/wishlist/remove`);
+    return res;
+}
+
+
+export const clearWishlist = async(id : string, userId:string) =>{
+    const res = await api.get(`/api/user/wishlist/clear`);
+    return res;
+}
+
+
 

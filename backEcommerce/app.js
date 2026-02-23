@@ -12,7 +12,7 @@ const cartRoutes = require("./routes/user/cart.route");
 const orderRoutes = require("./routes/user/order.route");
 const paymentRoutes = require("./routes/user/payment.route");
 const productRoutes = require("./routes/user/product.route");
-
+const wishlistRoutes = require("./routes/user/wishlist.route");
 
 // Admin k liye
 const adminAuthRoutes = require("./routes/admin/auth.route");
@@ -43,6 +43,8 @@ app.use("/api/user/cart",protect, cartRoutes);
 app.use("/api/user/order",protect, orderRoutes);
 app.use("/api/user/payment",protect, paymentRoutes);
 app.use("/api/user/product",protect, productRoutes);
+app.use("/api/user/wishlist", wishlistRoutes);
+
 //  Admin Routes
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/product",protect, adminProductRoutes);

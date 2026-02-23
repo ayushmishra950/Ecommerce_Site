@@ -9,9 +9,14 @@ import { cn } from '@/lib/utils';
 import { addToCart,removeFromCart } from '@/redux-toolkit/slice/cartSlice';
 import { addAndRemoveWishList } from '@/redux-toolkit/slice/wishListSlice';
 import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
+import {addProductToWishlist, getProductToWishlist,removeProductToWishlist, clearWishlist } from "@/services/service";
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 
 export const ProductCard = ({ product }) => {
+  const {user} = useAuth();
+  const {toast} = useToast();
   // const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const dispatch = useAppDispatch();
@@ -21,7 +26,29 @@ export const ProductCard = ({ product }) => {
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
+ 
+    const handleAddAndRemoveWishlist = async(product)=> {
 
+       const item = wishList.find((v)=> v?._id===product?._id);
+       try{
+       let res = null;
+       if(item){
+      res =  await removeProductToWishlist(item?._id, user?.id);
+       }
+       else{
+      res =  await addProductToWishlist(product?._id, user?.id);
+       }
+       console.log(res)
+       if(res.status===200 || res.status===201){
+        dispatch(addAndRemoveWishList(product));
+        toast({title:item?._id?"Remove Item To Wishlist." : "Add Item To Wishlist.", description:res?.data?.message})
+       }
+      }
+      catch(err){
+        console.log(err)
+        toast({title:"Error Wishlist Product.", description:err?.message || err?.response?.data?.message, variant:"destructive"})
+      }
+    }
     if(!product) return null;
 
   return (
@@ -62,7 +89,7 @@ export const ProductCard = ({ product }) => {
             'absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity',
             isWishlisted && 'opacity-100'
           )}
-          onClick={() => { dispatch(addAndRemoveWishList(product)) }}
+          onClick={() => { handleAddAndRemoveWishlist(product) }}
         >
           <Heart
             className={cn('h-4 w-4', isWishlisted && 'fill-destructive text-destructive')}

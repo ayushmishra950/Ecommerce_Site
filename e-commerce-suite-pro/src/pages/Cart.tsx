@@ -163,7 +163,7 @@ const Cart = () => {
             Looks like you haven't added anything yet. Start shopping and discover amazing products!
           </p>
           <div className="flex gap-4 justify-center">
-            <Button size="lg" asChild className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400">
+            <Button size="lg" asChild className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700">
               <Link to="/products">
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 Start Shopping
@@ -244,7 +244,7 @@ const Cart = () => {
                           <div className="flex-1 min-w-0 pr-4">
                             <Link
                               to={`/product/${item._id}`}
-                              className="font-semibold text-gray-900 hover:text-blue-600 transition-colors text-lg block mb-1 truncate"
+                              className="font-semibold text-gray-900 hover:text-yellow-600 transition-colors text-lg block mb-1 truncate"
                             >
                               {item.name}
                             </Link>
@@ -320,7 +320,7 @@ const Cart = () => {
                         <div className="flex items-center gap-4 mt-4">
                           <button
                             onClick={() => saveForLater(item)}
-                            className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                            className="text-sm text-yellow-600 hover:text-yellow-700 font-medium flex items-center gap-1"
                           >
                             <Heart className="w-4 h-4" />
                             Save for Later
@@ -409,7 +409,7 @@ const Cart = () => {
             {/* Coupon Card */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
               <div className="flex items-center gap-2 mb-4">
-                <Tag className="w-5 h-5 text-blue-600" />
+                <Tag className="w-5 h-5 text-yellow-600" />
                 <h3 className="font-bold text-gray-900">Apply Coupon</h3>
               </div>
 
@@ -440,9 +440,9 @@ const Cart = () => {
                     placeholder="Enter coupon code"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   />
-                  <Button onClick={applyCoupon} className="bg-blue-600 hover:bg-blue-700">
+                  <Button onClick={applyCoupon} className="bg-yellow-600 hover:bg-yellow-700">
                     Apply
                   </Button>
                 </div>
@@ -457,7 +457,7 @@ const Cart = () => {
                       onClick={() => {
                         setCouponCode(code);
                       }}
-                      className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-semibold hover:bg-blue-100 transition-colors"
+                      className="text-xs bg-yellow-50 text-yellow-700 px-3 py-1 rounded-full font-semibold hover:bg-yellow-100 transition-colors"
                     >
                       {code}
                     </button>
@@ -521,7 +521,7 @@ const Cart = () => {
 
                 <div className="flex justify-between text-xl font-bold text-gray-900">
                   <span>Total</span>
-                  <span className="text-blue-600">₹{grandTotal.toFixed(2)}</span>
+                  <span className="text-yellow-600">₹{grandTotal.toFixed(2)}</span>
                 </div>
 
                 {shipping > 0 && (
@@ -534,7 +534,7 @@ const Cart = () => {
                 )}
 
                 <Button
-                  className="w-full h-12 text-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 shadow-lg shadow-blue-500/30"
+                  className="w-full h-12 text-lg bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 shadow-lg shadow-yellow-500/30"
                   size="lg"
                   asChild
                 >
@@ -551,7 +551,7 @@ const Cart = () => {
                     <p className="text-xs text-gray-600 font-semibold">Secure</p>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <Truck className="w-6 h-6 mx-auto text-blue-600 mb-1" />
+                    <Truck className="w-6 h-6 mx-auto text-yellow-600 mb-1" />
                     <p className="text-xs text-gray-600 font-semibold">Fast Ship</p>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">

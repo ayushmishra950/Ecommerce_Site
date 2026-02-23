@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/redux-toolkit/hooks/hook";
 import { addToCart,removeFromCart } from '@/redux-toolkit/slice/cartSlice';
 import { addAndRemoveWishList } from '@/redux-toolkit/slice/wishListSlice';
+import {addProductToWishlist, getProductToWishlist,removeProductToWishlist, clearWishlist } from "@/services/service";
+
 
 const WishlistPage = () => {
   const dispatch = useAppDispatch();
@@ -96,11 +98,11 @@ const WishlistPage = () => {
 
   if (wishlistItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-yellow-100 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
           <div className="relative mb-8">
             <Heart className="h-24 w-24 mx-auto text-gray-300" />
-            <Sparkles className="h-8 w-8 text-pink-400 absolute top-0 right-1/3 animate-pulse" />
+            <Sparkles className="h-8 w-8 text-yellow-400 absolute top-0 right-1/3 animate-pulse" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Your Wishlist is Empty</h1>
           <p className="text-gray-600 mb-8 text-lg">
@@ -110,7 +112,7 @@ const WishlistPage = () => {
             <Button
               size="lg"
               asChild
-              className="bg-gradient-to-r from-pink-600 to-red-500 hover:from-pink-500 hover:to-red-400"
+              className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700"
             >
               <Link to="/products">
                 <Heart className="mr-2 h-5 w-5" />
@@ -130,14 +132,14 @@ const WishlistPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-yellow-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                <Heart className="h-10 w-10 text-pink-600 fill-pink-600" />
+                <Heart className="h-10 w-10 text-yellow-600 fill-yellow-600" />
                 My Wishlist
               </h1>
               <p className="text-gray-600">
@@ -156,8 +158,8 @@ const WishlistPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="bg-pink-100 rounded-lg p-3">
-                  <Heart className="h-6 w-6 text-pink-600" />
+                <div className="bg-yellow-100 rounded-lg p-3">
+                  <Heart className="h-6 w-6 text-yellow-600" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Total Items</p>
@@ -200,7 +202,7 @@ const WishlistPage = () => {
                   placeholder="Search in wishlist..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 />
               </div>
 
@@ -208,7 +210,7 @@ const WishlistPage = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
               >
                 <option value="name">Sort by Name</option>
                 <option value="price-low">Price: Low to High</option>
@@ -256,7 +258,7 @@ const WishlistPage = () => {
               viewMode === 'grid' ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
             )}
           >
-            {filteredItems.map((item) => {
+            { filteredItems.map((item) => {
               const discount = calculateDiscount(item);
               const isInStock = item.stock > 0;
 
@@ -297,9 +299,9 @@ const WishlistPage = () => {
                     {/* Remove Button */}
                     <button
                       onClick={() => handleRemoveFromWishlist(item)}
-                      className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg hover:bg-red-50 transition-colors group/btn"
+                      className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg hover:bg-yellow-50 transition-colors group/btn"
                     >
-                      <Heart className="h-5 w-5 text-pink-600 fill-pink-600 group-hover/btn:text-red-600" />
+                      <Heart className="h-5 w-5 text-yellow-600 fill-yellow-600 group-hover/btn:text-yellow-700" />
                     </button>
                   </div>
 
@@ -307,7 +309,7 @@ const WishlistPage = () => {
                   <div className="p-6">
                     <div className="mb-3">
                       <Link to={`/product/${item._id}`}>
-                        <h3 className="font-bold text-gray-900 text-lg mb-1 hover:text-pink-600 transition-colors line-clamp-2">
+                        <h3 className="font-bold text-gray-900 text-lg mb-1 hover:text-yellow-600 transition-colors line-clamp-2">
                           {item.name}
                         </h3>
                       </Link>
@@ -355,7 +357,7 @@ const WishlistPage = () => {
                     {/* Action Buttons */}
                     <div className="flex gap-2">
                       <Button
-                        className="flex-1 bg-gradient-to-r from-pink-600 to-red-500 hover:from-pink-500 hover:to-red-400"
+                        className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700"
                         onClick={() => handleMoveToCart(item)}
                         disabled={!isInStock}
                       >
@@ -365,7 +367,7 @@ const WishlistPage = () => {
                       <Button
                         variant="outline"
                         onClick={() => handleRemoveFromWishlist(item)}
-                        className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                        className="hover:bg-yellow-50 hover:text-yellow-600 hover:border-yellow-200"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -382,7 +384,7 @@ const WishlistPage = () => {
           <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <Gift className="h-8 w-8 text-pink-600" />
+                <Gift className="h-8 w-8 text-yellow-600" />
                 <div>
                   <h3 className="font-bold text-gray-900">Ready to checkout?</h3>
                   <p className="text-sm text-gray-600">
@@ -400,13 +402,13 @@ const WishlistPage = () => {
                       description: "All items have been removed from your wishlist",
                     });
                   }}
-                  className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                  className="hover:bg-yellow-50 hover:text-yellow-600 hover:border-yellow-200"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Clear All
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-pink-600 to-red-500 hover:from-pink-500 hover:to-red-400"
+                  className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700"
                   onClick={() => {
                     wishlistItems.forEach(item => {
                       if (item.stock > 0) {
