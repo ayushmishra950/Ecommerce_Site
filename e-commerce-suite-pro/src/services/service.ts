@@ -156,7 +156,7 @@ export const updateCart = async(id : string, userId:string) =>{
     return res;
 }
 
-export const getCart = async(id : string, userId:string) =>{
+export const getCart = async() =>{
     const res = await api.get(`/api/user/cart/get`);
     return res;
 }

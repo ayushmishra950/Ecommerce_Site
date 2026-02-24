@@ -24,9 +24,10 @@ import { Separator } from '@/components/ui/separator';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from "@/redux-toolkit/store/store";
 import { decrementQuantity, incrementQuantity, removeFromCart, clearCart } from '@/redux-toolkit/slice/cartSlice';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import {getCart} from "@/services/service";
 
 // Recommended Products Dummy Data
 const recommendedProducts = [
@@ -65,7 +66,25 @@ const Cart = () => {
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [discount, setDiscount] = useState(0);
   const [savedItems, setSavedItems] = useState<any[]>([]);
+  const [cartList, setCartList] = useState([]);
 
+  const handleGetCart = async () => {
+    try{
+       const res = await getCart();
+       console.log(res);
+       if(res.status===200){
+         setCartList(res?.data?.cart?.items)
+       }
+    }
+    catch(err){
+      console.log(err);
+      toast({title:"Error Cart.", description:err?.response?.data?.message || err?.message, variant:"destructive"})
+    }
+  }
+
+  useEffect(()=>{
+  handleGetCart();
+  },[])
   // Calculate totals
   let subtotal = 0;
   items?.forEach((item) => {
@@ -150,7 +169,7 @@ const Cart = () => {
     });
   };
 
-  if (items.length === 0 && savedItems.length === 0) {
+  if (cartList?.length === 0 && cartList?.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
@@ -223,17 +242,17 @@ const Cart = () => {
               </div>
 
               <div className="divide-y divide-gray-100">
-                {items.map((item) => (
+                { cartList?.map((item) => (
                   <div key={item._id} className="p-6 hover:bg-gray-50 transition-colors">
                     <div className="flex gap-6">
                       {/* Product Image */}
                       <Link
-                        to={`/product/${item._id}`}
+                        to={`/product/${item?._id}`}
                         className="w-28 h-28 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 group"
                       >
                         <img
-                          src={item.images[0]}
-                          alt={item.name}
+                          // src={item?.images[0]}
+                          // alt={item.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                         />
                       </Link>
@@ -243,10 +262,10 @@ const Cart = () => {
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-1 min-w-0 pr-4">
                             <Link
-                              to={`/product/${item._id}`}
+                              to={`/product/${item?._id}`}
                               className="font-semibold text-gray-900 hover:text-yellow-600 transition-colors text-lg block mb-1 truncate"
                             >
-                              {item.name}
+                              {item?.name}
                             </Link>
                             <p className="text-sm text-gray-600 mb-2">
                               {item?.category?.name || 'General'}
@@ -265,10 +284,10 @@ const Cart = () => {
                             size="icon"
                             className="text-gray-400 hover:text-red-600 hover:bg-red-50 -mt-1"
                             onClick={() => {
-                              dispatch(removeFromCart(item._id));
+                              dispatch(removeFromCart(item?._id));
                               toast({
                                 title: "Item Removed",
-                                description: `${item.name} has been removed from cart`,
+                                description: `${item?.name} has been removed from cart`,
                               });
                             }}
                           >

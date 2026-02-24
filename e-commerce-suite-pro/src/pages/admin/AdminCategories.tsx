@@ -14,7 +14,7 @@ import { formatDate } from "@/services/allFunction";
 import DeleteModal from "@/card/DeleteModal";
 import {getStatusVariant} from "@/services/allFunction";
 import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
-import { getCategoryList } from '@/redux-toolkit/slice/categorySlice';
+import { setCategoryList } from '@/redux-toolkit/slice/categorySlice';
 
 const AdminCategories = () => {
   const { user } = useAuth();
@@ -92,7 +92,7 @@ const AdminCategories = () => {
     let obj = { userId: user?.id, shopId: user?.shopId }
     try {
       const res = await getCategory(obj);
-      dispatch(getCategoryList(res.data.data));
+      dispatch(setCategoryList(res.data.data));
       setCategoryListRefresh(false);
     }
     catch (err) {

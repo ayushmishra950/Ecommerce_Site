@@ -7,10 +7,11 @@ const User = require("../../models/user.model");
  */
 const getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ user: req.user._id }).populate(
+    const cart = await Cart.find({ user: req.user.id }).populate(
       "items.product"
     );
-
+  
+    console.log(cart)
     if (!cart) {
       return res.status(200).json({
         success: true,
@@ -100,10 +101,14 @@ const addToCart = async (req, res) => {
     cart.calculateTotal();
     await cart.save();
 
-    if (!user.cart.includes(cart._id)) {
-      user.cart.push(cart._id);
-    }
-    await user.save();
+ const alreadyExists = user.cart.some(
+  id => id?._id.toString() === cart._id.toString()
+);
+console.log(alreadyExists)
+if (!alreadyExists) {
+  user.cart.push(cart._id);
+  await user.save();
+}
 
     res.status(201).json({
       success: true,

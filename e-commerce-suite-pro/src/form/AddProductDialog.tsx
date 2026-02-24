@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 import { addProduct, updateProduct, getCategory } from "@/services/service";
 import AddCategoryDialog from "./AddCategoryDialog"
 import { useAppDispatch, useAppSelector } from "@/redux-toolkit/hooks/hook"
-import { getCategoryList } from "@/redux-toolkit/slice/categorySlice"
+import { setCategoryList } from "@/redux-toolkit/slice/categorySlice"
 
 type FormChangeEvent = | React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>
 
@@ -149,7 +149,7 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
         try {
             const res = await getCategory(obj);
             // setCategoryList(res?.data?.data);
-            dispatch(getCategoryList(res.data.data))
+            dispatch(setCategoryList(res.data.data))
         }
         catch (err) {
             console.log(err);

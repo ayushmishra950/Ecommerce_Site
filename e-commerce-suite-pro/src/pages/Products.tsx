@@ -34,6 +34,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getProductByCategoryId, getProductsByUsers } from "@/services/service";
 import { Slider } from '@/components/ui/slider';
+import {setProductList} from "@/redux-toolkit/slice/productSlice";
+import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
 
 const Products = () => {
   const { toast } = useToast();
@@ -43,7 +45,7 @@ const Products = () => {
   const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('featured');
-  const [productList, setProductList] = useState<any>([]);
+  // const [productList, setProductList] = useState<any>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [priceRange, setPriceRange] = useState([0, 100000]);
@@ -51,6 +53,8 @@ const Products = () => {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
+  const dispatch = useAppDispatch();
+  const productList = useAppSelector((state)=> state?.product?.productList)
 
   const categoryFilter = searchParams.get('category');
   const searchParamQuery = searchParams.get('search');
@@ -116,7 +120,7 @@ const Products = () => {
     try {
       const res = await (id ? getProductByCategoryId(id) : getProductsByUsers());
       if (res.status === 200) {
-        setProductList(res?.data?.data);
+       dispatch(setProductList(res?.data?.data));
       }
     } catch (err) {
       console.log(err);
@@ -125,8 +129,10 @@ const Products = () => {
   };
 
   useEffect(() => {
-    handleGetProduct();
-  }, [id]);
+    if(productList.length===0 || id){
+handleGetProduct();
+    }
+  }, [id, productList.length]);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev =>

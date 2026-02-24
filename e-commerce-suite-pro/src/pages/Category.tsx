@@ -3,6 +3,8 @@ import {getCategoryByUsers} from "@/services/service";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/redux-toolkit/hooks/hook";
+import { setCategoryList } from "@/redux-toolkit/slice/categorySlice";
 type Category = {
   id: number;
   name: string;
@@ -19,14 +21,15 @@ const dummyCategories: Category[] = [
 const Category: React.FC = () => {
   const {user} = useAuth();
   const {toast} = useToast();
-  const [categories, setCategories] = useState<any>([]);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const categories = useAppSelector((state)=> state?.category?.categoryList)
 
   const handleGetCategory = async() => {
     try{
       const res = await getCategoryByUsers();
       if(res.status === 200){
-        setCategories(res?.data?.data);
+        dispatch(setCategoryList(res?.data?.data))
       }
     }
     catch(err){
@@ -36,8 +39,10 @@ const Category: React.FC = () => {
   }
 
   useEffect(()=>{
-    handleGetCategory()
-  },[])
+    if(categories?.length===0 || user){
+ handleGetCategory()
+    }
+  },[categories.length])
   return (
     <div className="w-44 bg-white border border-gray-200 shadow-lg rounded-md">
       {categories?.map((category) => (
