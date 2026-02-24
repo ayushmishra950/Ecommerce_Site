@@ -79,7 +79,7 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react'
 import { User } from '@/types'
-import {loginUser} from "@/services/service"
+import { loginUser } from "@/services/service"
 import { useToast } from '@/hooks/use-toast'
 
 
@@ -98,7 +98,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const {toast} = useToast();
+  const { toast } = useToast();
   const [user, setUser] = useState<User | null>(() => {
     // Check localStorage on initial load
     const storedUser = localStorage.getItem('user')
@@ -106,44 +106,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   })
 
   const login = useCallback(async (email: string, password: string): Promise<LoginResult> => {
-    let obj = {email, password}
+    let obj = { email, password }
     try {
       const response = await loginUser(obj);
       console.log(response)
-    if(response.status ===200){
-      const { accessToken } = response.data
-      localStorage.setItem('accessToken', accessToken)
+      if (response.status === 200) {
+        const { accessToken } = response.data
+        localStorage.setItem('accessToken', accessToken)
 
-      const userInfo: User = {
-        id: response?.data?.admin?._id, 
-        name: response?.data?.admin?.name,
-        email : response?.data?.admin?.email,
-        role: response?.data?.admin?.role,
-        shopId: response?.data?.admin?.shopId,
-        createdBy: response?.data?.admin?.createdBy
+        const userInfo: User = {
+          id: response?.data?.admin?._id,
+          name: response?.data?.admin?.name,
+          email: response?.data?.admin?.email,
+          role: response?.data?.admin?.role,
+          shopId: response?.data?.admin?.shopId,
+          createdBy: response?.data?.admin?.createdBy
+        }
+        setUser(userInfo)
+        localStorage.setItem('user', JSON.stringify(userInfo))
+        toast({ title: "Welcome back!.", description: response?.data?.message });
+        return { success: true, user: userInfo };
       }
-      setUser(userInfo)
-      localStorage.setItem('user', JSON.stringify(userInfo))
-      toast({title:"Welcome back!.", description:response?.data?.message});
-     return { success: true, user: userInfo };
-    }
-    else{
-     const msg = response?.data?.message || "Login failed";
-      toast({ title: "Login Failed", description: msg, variant:"destructive" });
-      return { success: false, message: msg };
-    }
+      else {
+        const msg = response?.data?.message || "Login failed";
+        toast({ title: "Login Failed", description: msg, variant: "destructive" });
+        return { success: false, message: msg };
+      }
     } catch (error: any) {
-     const msg = error?.response?.data?.message || error.message || "Something went wrong";
-    console.error("Login failed:", msg);
-    toast({ title: "Error", description: msg, variant: "destructive" });
-    return { success: false, message: msg };
+      const msg = error?.response?.data?.message || error.message || "Something went wrong";
+      console.error("Login failed:", msg);
+      toast({ title: "Error", description: msg, variant: "destructive" });
+      return { success: false, message: msg };
     }
   }, [])
 
   const logout = useCallback(() => {
     setUser(null)
     localStorage.removeItem('user')
-    localStorage.removeItem('token')
+    localStorage.removeItem('accessToken')
   }, [])
 
   return (

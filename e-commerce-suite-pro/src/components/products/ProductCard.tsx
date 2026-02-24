@@ -6,50 +6,67 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types';
 import { cn } from '@/lib/utils';
-import { addToCart,removeFromCart } from '@/redux-toolkit/slice/cartSlice';
+import { addToCart, removeFromCart } from '@/redux-toolkit/slice/cartSlice';
 import { addAndRemoveWishList } from '@/redux-toolkit/slice/wishListSlice';
 import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
-import {addProductToWishlist, getProductToWishlist,removeProductToWishlist, clearWishlist } from "@/services/service";
+import { addProductToWishlist, getProductToWishlist, removeProductToWishlist, clearWishlist, addCart } from "@/services/service";
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 
 export const ProductCard = ({ product }) => {
-  const {user} = useAuth();
-  const {toast} = useToast();
+  const { user } = useAuth();
+  const { toast } = useToast();
   // const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const dispatch = useAppDispatch();
-  
-    const wishList = useAppSelector((state) => state?.wishList?.wishList);
+
+  const wishList = useAppSelector((state) => state?.wishList?.wishList);
   const isWishlisted = Boolean(wishList?.find((v) => v?._id === product?._id));
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
- 
-    const handleAddAndRemoveWishlist = async(product)=> {
 
-       const item = wishList.find((v)=> v?._id===product?._id);
-       try{
-       let res = null;
-       if(item){
-      res =  await removeProductToWishlist(item?._id, user?.id);
-       }
-       else{
-      res =  await addProductToWishlist(product?._id, user?.id);
-       }
-       console.log(res)
-       if(res.status===200 || res.status===201){
-        dispatch(addAndRemoveWishList(product));
-        toast({title:item?._id?"Remove Item To Wishlist." : "Add Item To Wishlist.", description:res?.data?.message})
-       }
+  const handleAddAndRemoveWishlist = async (product) => {
+
+    const item = wishList.find((v) => v?._id === product?._id);
+    try {
+      let res = null;
+      if (item) {
+        res = await removeProductToWishlist(item?._id, user?.id);
       }
-      catch(err){
-        console.log(err)
-        toast({title:"Error Wishlist Product.", description:err?.message || err?.response?.data?.message, variant:"destructive"})
+      else {
+        res = await addProductToWishlist(product?._id, user?.id);
+      }
+      console.log(res)
+      if (res.status === 200 || res.status === 201) {
+        dispatch(addAndRemoveWishList(product));
+        toast({ title: item?._id ? "Remove Item To Wishlist." : "Add Item To Wishlist.", description: res?.data?.message })
       }
     }
-    if(!product) return null;
+    catch (err) {
+      console.log(err)
+      toast({ title: "Error Wishlist Product.", description: err?.message || err?.response?.data?.message, variant: "destructive" })
+    }
+  };
+
+  const handleAddCart = async (product) => {
+    let quantity = 1;
+    try {
+      const res = await addCart(product?._id, quantity);
+      console.log(res)
+      if (res.status === 201) {
+        toast({ title: "Add Item To Cart.", description: res?.data?.message })
+        dispatch(addToCart(product))
+
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({ title: "Error Add Cart.", description: err?.response?.data?.message || err?.message, variant: "destructive" })
+    }
+  }
+  if (!product) return null;
 
   return (
     <Card
@@ -107,7 +124,7 @@ export const ProductCard = ({ product }) => {
             className="w-full"
             size="sm"
             disabled={!product.stock}
-            onClick={() => { dispatch(addToCart(product)) }}
+            onClick={() => { handleAddCart(product) }}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add to Cart

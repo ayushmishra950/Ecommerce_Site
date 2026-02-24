@@ -22,7 +22,7 @@ const cartController = require("../../controllers/user/cart.controller");
  *       200:
  *         description: User cart fetched successfully
  */
-router.get("/", cartController.getCart);
+router.get("/get", cartController.getCart);
 
 /**
  * @swagger

@@ -145,3 +145,36 @@ export const clearWishlist = async(id : string, userId:string) =>{
 
 
 
+export const addCart = async(id : string, quantity:number) =>{
+    const res = await api.post(`/api/user/cart/add`, {productId:id, quantity:quantity});
+    return res;
+}
+
+
+export const updateCart = async(id : string, userId:string) =>{
+    const res = await api.get(`/api/user/cart/update`);
+    return res;
+}
+
+export const getCart = async(id : string, userId:string) =>{
+    const res = await api.get(`/api/user/cart/get`);
+    return res;
+}
+
+
+export const removeCart = async(id : string, userId:string) =>{
+    const res = await api.get(`/api/user/cart/remove/${id}`);
+    return res;
+}
+
+
+export const clearCart = async(id : string, userId:string) =>{
+    const res = await api.get(`/api/user/clear`);
+    return res;
+}
+
+
+
+
+
+

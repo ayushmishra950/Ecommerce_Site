@@ -1,5 +1,6 @@
 const Cart = require("../../models/cart.model");
 const Product = require("../../models/product.model");
+const User = require("../../models/user.model");
 
 /**
  * ✅ Get User Cart
@@ -32,19 +33,35 @@ const getCart = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
+    const qty = Number(quantity) || 1;
+
+    if (qty <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid quantity",
+      });
+    }
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
     }
 
-    let cart = await Cart.findOne({ user: req.user._id });
+    if (product.stock < qty) {
+      return res.status(400).json({
+        success: false,
+        message: "Not enough stock available",
+      });
+    }
+
+    let cart = await Cart.findOne({ user: req.user.id });
 
     if (!cart) {
       cart = new Cart({
-        user: req.user._id,
+        user: req.user.id,
         items: [],
       });
     }
@@ -54,25 +71,50 @@ const addToCart = async (req, res) => {
     );
 
     if (itemIndex > -1) {
-      cart.items[itemIndex].quantity += quantity || 1;
+      const newQty = cart.items[itemIndex].quantity + qty;
+
+      if (newQty > product.stock) {
+        return res.status(400).json({
+          success: false,
+          message: "Stock limit exceeded",
+        });
+      }
+
+      cart.items[itemIndex].quantity = newQty;
     } else {
       cart.items.push({
         product: productId,
-        quantity: quantity || 1,
+        quantity: qty,
         price: product.price,
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
       });
     }
 
     cart.calculateTotal();
     await cart.save();
 
-    res.status(200).json({
+    if (!user.cart.includes(cart._id)) {
+      user.cart.push(cart._id);
+    }
+    await user.save();
+
+    res.status(201).json({
       success: true,
       message: "Item added to cart",
       cart,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -174,7 +216,7 @@ const clearCart = async (req, res) => {
 module.exports = {
   getCart,
   addToCart,
-    updateCartItem,
+  updateCartItem,
   removeFromCart,
   clearCart,
 };
