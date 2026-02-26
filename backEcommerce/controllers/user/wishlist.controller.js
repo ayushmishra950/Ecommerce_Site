@@ -8,9 +8,8 @@ const User = require("../../models/user.model");
  * @access  Private (User)
  */
 const getWishlist = async (req, res) => {
-    const {userId} = req.query;
   try {
-    const wishlist = await Wishlist.find({ user: userId })
+    const wishlist = await Wishlist.find({ user: req.user.id })
       .populate("product");
 
     res.status(200).json({
@@ -34,7 +33,6 @@ const getWishlist = async (req, res) => {
  */
 const addToWishlist = async (req, res) => {
   const {userId, productId} = req.body;
-  console.log(req.body)
 
   try {
     const user = await User.findOne({_id:userId});
@@ -88,14 +86,15 @@ const addToWishlist = async (req, res) => {
  * @access  Private (User)
  */
 const removeFromWishlist = async (req, res) => {
-  const {userId, productId} = req.query;
+  const {productId} = req.query;
+  // console.log(productId);
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(req?.user?.id);
     if(!user) return res.status(404).json({message:"user not found."});
 
     const item = await Wishlist.findOneAndDelete({
-      user: userId,
+      user: user?._id,
       product: productId,
     });
 

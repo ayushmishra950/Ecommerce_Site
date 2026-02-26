@@ -23,11 +23,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from "@/redux-toolkit/store/store";
-import { decrementQuantity, incrementQuantity, removeFromCart, clearCart } from '@/redux-toolkit/slice/cartSlice';
+import { decrementQuantity, incrementQuantity, removeFromCart } from '@/redux-toolkit/slice/cartSlice';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import {getCart} from "@/services/service";
+import { getCart, removeCart, clearCart, updateCart } from "@/services/service";
 
 // Recommended Products Dummy Data
 const recommendedProducts = [
@@ -67,24 +67,58 @@ const Cart = () => {
   const [discount, setDiscount] = useState(0);
   const [savedItems, setSavedItems] = useState<any[]>([]);
   const [cartList, setCartList] = useState([]);
+  const [cartListRefresh, setCartListRefresh] = useState(false);
 
-  const handleGetCart = async () => {
-    try{
-       const res = await getCart();
-       console.log(res);
-       if(res.status===200){
-         setCartList(res?.data?.cart?.items)
-       }
+
+  const handleUpdateCart = async (id, quantity, type) => {
+    try {
+      let obj = { productId: id, type };
+      const res = await updateCart(obj);
+      if (res.status === 200) {
+        toast({ title: "Update Cart Item.", description: res.data?.message })
+        setCartListRefresh(true);
+      }
     }
-    catch(err){
+    catch (err) {
       console.log(err);
-      toast({title:"Error Cart.", description:err?.response?.data?.message || err?.message, variant:"destructive"})
+      toast({ title: "Error Update Cart Item.", description: err?.response?.data?.message || err?.message, variant: "destructive" })
     }
   }
 
-  useEffect(()=>{
-  handleGetCart();
-  },[])
+  const handleRemoveCart = async (id) => {
+    try {
+      const res = await removeCart(id);
+      if (res.status === 200) {
+        toast({ title: "Cart Item Removed.", description: res.data?.message });
+        setCartListRefresh(true);
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({ title: "Error", description: err?.response?.data?.message || err?.message, variant: "destructive" })
+    }
+  }
+
+  const handleGetCart = async () => {
+    try {
+      const res = await getCart();
+      console.log(res);
+      if (res.status === 200) {
+        setCartList(res?.data?.cart?.[0]?.items);
+        setCartListRefresh(false);
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({ title: "Error Cart.", description: err?.response?.data?.message || err?.message, variant: "destructive" })
+    }
+  }
+
+  useEffect(() => {
+    if (cartList.length === 0 || cartListRefresh) {
+      handleGetCart();
+    }
+  }, [cartList.length, cartListRefresh])
   // Calculate totals
   let subtotal = 0;
   items?.forEach((item) => {
@@ -161,12 +195,19 @@ const Cart = () => {
     });
   };
 
-  const handleClearCart = () => {
-    dispatch(clearCart());
-    toast({
-      title: "Cart Cleared",
-      description: "All items have been removed from your cart",
-    });
+  const handleClearCart = async () => {
+    try {
+      const res = await clearCart();
+      if (res.status === 200) {
+        toast({ title: "Clear Cart.", description: res.data?.message });
+        setCartListRefresh(true);
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({ title: "Error Clear Cart.", description: err?.response?.data?.message || err?.message, variant: "destructive" })
+    }
+
   };
 
   if (cartList?.length === 0 && cartList?.length === 0) {
@@ -227,7 +268,7 @@ const Cart = () => {
               <div className="p-6 border-b border-gray-100">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-gray-900">Cart Items</h2>
-                  {items.length > 0 && (
+                  {cartList.length > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -242,7 +283,7 @@ const Cart = () => {
               </div>
 
               <div className="divide-y divide-gray-100">
-                { cartList?.map((item) => (
+                {cartList?.map((item) => (
                   <div key={item._id} className="p-6 hover:bg-gray-50 transition-colors">
                     <div className="flex gap-6">
                       {/* Product Image */}
@@ -251,7 +292,7 @@ const Cart = () => {
                         className="w-28 h-28 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 group"
                       >
                         <img
-                          // src={item?.images[0]}
+                          src={item?.product?.images[0]}
                           // alt={item.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                         />
@@ -265,7 +306,7 @@ const Cart = () => {
                               to={`/product/${item?._id}`}
                               className="font-semibold text-gray-900 hover:text-yellow-600 transition-colors text-lg block mb-1 truncate"
                             >
-                              {item?.name}
+                              {item?.product?.name}
                             </Link>
                             <p className="text-sm text-gray-600 mb-2">
                               {item?.category?.name || 'General'}
@@ -283,13 +324,7 @@ const Cart = () => {
                             variant="ghost"
                             size="icon"
                             className="text-gray-400 hover:text-red-600 hover:bg-red-50 -mt-1"
-                            onClick={() => {
-                              dispatch(removeFromCart(item?._id));
-                              toast({
-                                title: "Item Removed",
-                                description: `${item?.name} has been removed from cart`,
-                              });
-                            }}
+                            onClick={() => { handleRemoveCart(item?.product._id) }}
                           >
                             <Trash2 className="h-5 w-5" />
                           </Button>
@@ -303,7 +338,7 @@ const Cart = () => {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 hover:bg-white"
-                              onClick={() => dispatch(decrementQuantity(item._id))}
+                              onClick={() => handleUpdateCart(item.product?._id, item?.quantity, "decrease")}
                               disabled={item?.quantity <= 1}
                             >
                               <Minus className="h-4 w-4" />
@@ -315,7 +350,7 @@ const Cart = () => {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 hover:bg-white"
-                              onClick={() => dispatch(incrementQuantity(item._id))}
+                              onClick={() => handleUpdateCart(item.product?._id, item?.quantity, "increase")}
                               disabled={item?.quantity >= (item?.stock || 999)}
                             >
                               <Plus className="h-4 w-4" />
@@ -325,7 +360,7 @@ const Cart = () => {
                           {/* Price */}
                           <div className="text-right">
                             <p className="text-xl font-bold text-gray-900">
-                              ₹{item?.totalPrice?.toLocaleString()}
+                              ₹{item?.quantity * item?.product?.price}
                             </p>
                             {/* {item?.originalPrice && item?.originalPrice > item?.price && ( */}
                             <p className="text-sm text-gray-500 line-through">

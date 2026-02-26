@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,21 +19,24 @@ export const ProductCard = ({ product }) => {
   const { toast } = useToast();
   // const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [wishList, setWishList] = useState([]);
+  const [wishListRefresh, setWishListRefresh] = useState(false);
   const dispatch = useAppDispatch();
 
-  const wishList = useAppSelector((state) => state?.wishList?.wishList);
-  const isWishlisted = Boolean(wishList?.find((v) => v?._id === product?._id));
+  // const wishList = useAppSelector((state) => state?.wishList?.wishList);
+  const isWishlisted = Boolean(wishList?.find((v) => v?.product?._id === product?._id));
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
   const handleAddAndRemoveWishlist = async (product) => {
 
-    const item = wishList.find((v) => v?._id === product?._id);
+    const item = wishList.find((v) => v?.product?._id === product?._id);
+   console.log(item)
     try {
       let res = null;
       if (item) {
-        res = await removeProductToWishlist(item?._id, user?.id);
+        res = await removeProductToWishlist(item?.product?._id);
       }
       else {
         res = await addProductToWishlist(product?._id, user?.id);
@@ -66,6 +69,29 @@ export const ProductCard = ({ product }) => {
       toast({ title: "Error Add Cart.", description: err?.response?.data?.message || err?.message, variant: "destructive" })
     }
   }
+
+  
+    const handleGetProducts = async () => {
+      try {
+        const res = await getProductToWishlist();
+        if (res.status === 200) {
+          console.log(res)
+          setWishList(res.data?.data);
+          setWishListRefresh(false);
+        }
+      }
+      catch (err) {
+        console.log(err);
+  
+      }
+    };
+  
+    useEffect(() => {
+      // if (wishListRefresh || wishlist?.length){
+    handleGetProducts()
+      // }
+    }, [wishListRefresh, wishList?.length])
+  
   if (!product) return null;
 
   return (

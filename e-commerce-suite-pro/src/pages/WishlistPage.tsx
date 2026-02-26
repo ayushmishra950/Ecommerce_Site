@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux-toolkit/store/store";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,9 +26,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/redux-toolkit/hooks/hook";
-import { addToCart,removeFromCart } from '@/redux-toolkit/slice/cartSlice';
+import { addToCart, removeFromCart } from '@/redux-toolkit/slice/cartSlice';
 import { addAndRemoveWishList } from '@/redux-toolkit/slice/wishListSlice';
-import {addProductToWishlist, getProductToWishlist,removeProductToWishlist, clearWishlist } from "@/services/service";
+import { addProductToWishlist, getProductToWishlist, removeProductToWishlist, clearWishlist } from "@/services/service";
 
 
 const WishlistPage = () => {
@@ -39,6 +39,30 @@ const WishlistPage = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high'>('name');
   const wishlistItems = useAppSelector((state) => state?.wishList?.wishList);
+  const [wishlist, setWishList] = useState([]);
+  const [wishListRefresh, setWishListRefresh] = useState(false);
+
+
+  const handleGetProducts = async () => {
+    try {
+      const res = await getProductToWishlist();
+      if (res.status === 200) {
+        console.log(res)
+        setWishList(res.data?.data);
+        setWishListRefresh(false);
+      }
+    }
+    catch (err) {
+      console.log(err);
+
+    }
+  };
+
+  useEffect(() => {
+    // if (wishListRefresh || wishlist?.length){
+  handleGetProducts()
+    // }
+  }, [wishListRefresh, wishlist?.length])
 
   // Filter and sort items
   const filteredItems = wishlistItems
@@ -258,7 +282,7 @@ const WishlistPage = () => {
               viewMode === 'grid' ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
             )}
           >
-            { filteredItems.map((item) => {
+            {filteredItems.map((item) => {
               const discount = calculateDiscount(item);
               const isInStock = item.stock > 0;
 

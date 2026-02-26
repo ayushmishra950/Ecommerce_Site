@@ -2,8 +2,8 @@ const express = require("express");
 const setupSwagger = require("./swagger/swagger");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const {connectDB} = require("./config/db");
-const {protect} = require("./middlewares/auth.middleware")
+const { connectDB } = require("./config/db");
+const { protect } = require("./middlewares/auth.middleware")
 
 // user k liye
 const userAuthRoutes = require("./routes/user/auth.route");
@@ -16,15 +16,15 @@ const wishlistRoutes = require("./routes/user/wishlist.route");
 
 // Admin k liye
 const adminAuthRoutes = require("./routes/admin/auth.route");
- const adminProductRoutes = require("./routes/admin/product.route");
- const adminOrderRoutes = require("./routes/admin/order.route");
- const adminCouponRoutes = require("./routes/admin/coupon.route");
- const adminCategoryRoutes = require("./routes/admin/category.route");
- const adminUserRoutes = require("./routes/admin/user.route");
+const adminProductRoutes = require("./routes/admin/product.route");
+const adminOrderRoutes = require("./routes/admin/order.route");
+const adminCouponRoutes = require("./routes/admin/coupon.route");
+const adminCategoryRoutes = require("./routes/admin/category.route");
+const adminUserRoutes = require("./routes/admin/user.route");
 
 
 //  Super admin k liye
- const superAdminShopRoute = require("./routes/super-admin/shop-route");
+const superAdminShopRoute = require("./routes/super-admin/shop-route");
 
 
 const app = express();
@@ -33,25 +33,25 @@ connectDB();
 // Body parser
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({origin :"http://localhost:8080", credentials : true}))
+app.use(cors({ origin: "http://localhost:8080", credentials: true }))
 setupSwagger(app);
 
 // User Routes
 app.use("/api/user/auth", userAuthRoutes);
-app.use("/api/user/profile",protect, profileRoutes);
-app.use("/api/user/cart",protect, cartRoutes);
-app.use("/api/user/order",protect, orderRoutes);
-app.use("/api/user/payment",protect, paymentRoutes);
-app.use("/api/user/product",protect, productRoutes);
-app.use("/api/user/wishlist", wishlistRoutes);
+app.use("/api/user/profile", protect, profileRoutes);
+app.use("/api/user/cart", protect, cartRoutes);
+app.use("/api/user/order", protect, orderRoutes);
+app.use("/api/user/payment", protect, paymentRoutes);
+app.use("/api/user/product", protect, productRoutes);
+app.use("/api/user/wishlist",protect,  wishlistRoutes);
 
 //  Admin Routes
 app.use("/api/admin/auth", adminAuthRoutes);
-app.use("/api/admin/product",protect, adminProductRoutes);
-app.use("/api/admin/order",protect, adminOrderRoutes);
-app.use("/api/admin/coupon",protect, adminCouponRoutes);
-app.use("/api/admin/category",protect, adminCategoryRoutes);
-app.use("/api/admin/user",protect, adminUserRoutes);
+app.use("/api/admin/product", protect, adminProductRoutes);
+app.use("/api/admin/order", protect, adminOrderRoutes);
+app.use("/api/admin/coupon", protect, adminCouponRoutes);
+app.use("/api/admin/category", protect, adminCategoryRoutes);
+app.use("/api/admin/user", protect, adminUserRoutes);
 // Super Admin Routes
 app.use("/api/superadmin/shop", superAdminShopRoute);
 

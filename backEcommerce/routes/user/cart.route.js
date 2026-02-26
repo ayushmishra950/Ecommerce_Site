@@ -80,7 +80,7 @@ router.post("/add", cartController.addToCart);
  *       200:
  *         description: Cart updated successfully
  */
-router.put("/update", cartController.updateCartItem);
+router.patch("/update", cartController.updateCartItem);
 
 /**
  * @swagger
