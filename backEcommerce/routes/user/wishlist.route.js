@@ -5,7 +5,7 @@ const {getWishlist, addToWishlist, removeFromWishlist, clearWishlist} = require(
 
 router.get("/get", getWishlist);
 router.post("/add", addToWishlist);
-router.delete("/remove", removeFromWishlist);
+router.delete("/remove/:productId", removeFromWishlist);
 router.delete("/clear", clearWishlist);
 
 module.exports = router;

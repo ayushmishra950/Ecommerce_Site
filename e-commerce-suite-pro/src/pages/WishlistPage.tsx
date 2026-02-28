@@ -46,8 +46,8 @@ const WishlistPage = () => {
   const handleGetProducts = async () => {
     try {
       const res = await getProductToWishlist();
+       console.log(res)
       if (res.status === 200) {
-        console.log(res)
         setWishList(res.data?.data);
         setWishListRefresh(false);
       }
@@ -58,6 +58,21 @@ const WishlistPage = () => {
     }
   };
 
+  const handleProductRemoveFromWishlist = async (id) => {
+    try {
+      const res = await removeProductToWishlist(id);
+       console.log(res)
+      if (res.status === 200) {
+       toast({title:"Product remove from Wishlist.", description:res?.data?.message})
+        setWishListRefresh(true);
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({title:"Error remove from Wishlist.", description:err?.response?.data?.message, variant:"destructive"})
+    }
+  };
+
   useEffect(() => {
     // if (wishListRefresh || wishlist?.length){
   handleGetProducts()
@@ -65,19 +80,19 @@ const WishlistPage = () => {
   }, [wishListRefresh, wishlist?.length])
 
   // Filter and sort items
-  const filteredItems = wishlistItems
+  const filteredItems = wishlist
     .filter((item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      item?.product?.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       switch (sortBy) {
         case 'price-low':
-          return a.price - b.price;
+          return a?.product?.price - b?.product?.price;
         case 'price-high':
-          return b.price - a.price;
+          return b?.product?.price - a?.product?.price;
         case 'name':
         default:
-          return a.name.localeCompare(b.name);
+          return a?.product?.name.localeCompare(b?.product?.name);
       }
     });
 
@@ -120,7 +135,7 @@ const WishlistPage = () => {
     return acc + (original - item.price);
   }, 0);
 
-  if (wishlistItems.length === 0) {
+  if (filteredItems?.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-yellow-100 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
@@ -167,7 +182,7 @@ const WishlistPage = () => {
                 My Wishlist
               </h1>
               <p className="text-gray-600">
-                {wishlistItems.length} {wishlistItems.length === 1 ? 'item' : 'items'} saved
+                {filteredItems?.length} {filteredItems?.length === 1 ? 'item' : 'items'} saved
               </p>
             </div>
             <Button variant="outline" asChild>
@@ -187,7 +202,7 @@ const WishlistPage = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Total Items</p>
-                  <p className="text-2xl font-bold text-gray-900">{wishlistItems.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{filteredItems?.length}</p>
                 </div>
               </div>
             </div>
@@ -284,7 +299,7 @@ const WishlistPage = () => {
           >
             {filteredItems.map((item) => {
               const discount = calculateDiscount(item);
-              const isInStock = item.stock > 0;
+              const isInStock = item?.product?.stock > 0;
 
               return (
                 <div
@@ -299,8 +314,8 @@ const WishlistPage = () => {
                         viewMode === 'grid' ? "aspect-square" : "h-48"
                       )}>
                         <img
-                          src={item.images[0]}
-                          alt={item.name}
+                          src={item?.product?.images[0]}
+                          alt={item?.product?.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                         />
                       </div>
@@ -322,7 +337,7 @@ const WishlistPage = () => {
 
                     {/* Remove Button */}
                     <button
-                      onClick={() => handleRemoveFromWishlist(item)}
+                      onClick={() => handleProductRemoveFromWishlist(item?.product?._id)}
                       className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg hover:bg-yellow-50 transition-colors group/btn"
                     >
                       <Heart className="h-5 w-5 text-yellow-600 fill-yellow-600 group-hover/btn:text-yellow-700" />
@@ -334,10 +349,10 @@ const WishlistPage = () => {
                     <div className="mb-3">
                       <Link to={`/product/${item._id}`}>
                         <h3 className="font-bold text-gray-900 text-lg mb-1 hover:text-yellow-600 transition-colors line-clamp-2">
-                          {item.name}
+                          {item?.product?.name}
                         </h3>
                       </Link>
-                      <p className="text-sm text-gray-600">{item.category?.name || 'General'}</p>
+                      <p className="text-sm text-gray-600">{item?.product?.category?.name || 'General'}</p>
                     </div>
 
                     {/* Rating */}
@@ -347,21 +362,21 @@ const WishlistPage = () => {
                           key={i}
                           className={cn(
                             'w-4 h-4',
-                            i < Math.floor(item.rating || 4)
+                            i < Math.floor(item.product?.rating)
                               ? 'fill-yellow-400 text-yellow-400'
                               : 'text-gray-300'
                           )}
                         />
                       ))}
                       <span className="text-sm text-gray-600 ml-1">
-                        ({item.rating || 4.0})
+                        ({item.product?.rating})
                       </span>
                     </div>
 
                     {/* Price */}
                     <div className="flex items-baseline gap-2 mb-4">
                       <span className="text-2xl font-bold text-gray-900">
-                        ₹{item.price.toLocaleString()}
+                        ₹{item?.product?.price?.toLocaleString()}
                       </span>
                       {/* {item.originalPrice && item.originalPrice > item.price && ( */}
                       <span className="text-sm text-gray-500 line-through">
@@ -371,10 +386,10 @@ const WishlistPage = () => {
                     </div>
 
                     {/* Stock Info */}
-                    {isInStock && item.stock < 10 && (
+                    {isInStock && item?.product?.stock < 10 && (
                       <p className="text-xs text-orange-600 font-semibold mb-3 flex items-center gap-1">
                         <Package className="w-3 h-3" />
-                        Only {item.stock} left in stock!
+                        Only {item?.product?.stock} left in stock!
                       </p>
                     )}
 
@@ -390,7 +405,7 @@ const WishlistPage = () => {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => handleRemoveFromWishlist(item)}
+                        onClick={() => handleProductRemoveFromWishlist(item?.product?._id)}
                         className="hover:bg-yellow-50 hover:text-yellow-600 hover:border-yellow-200"
                       >
                         <Trash2 className="h-4 w-4" />

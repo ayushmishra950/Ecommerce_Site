@@ -10,7 +10,7 @@ const User = require("../../models/user.model");
 const getWishlist = async (req, res) => {
   try {
     const wishlist = await Wishlist.find({ user: req.user.id })
-      .populate("product");
+      .populate({path:"product",populate:{path:"category"}});
 
     res.status(200).json({
       success: true,
@@ -86,7 +86,7 @@ const addToWishlist = async (req, res) => {
  * @access  Private (User)
  */
 const removeFromWishlist = async (req, res) => {
-  const {productId} = req.query;
+  const {productId} = req.params;
   // console.log(productId);
 
   try {

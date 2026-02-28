@@ -133,7 +133,7 @@ export const getProductToWishlist = async () => {
 
 
 export const removeProductToWishlist = async (id: string) => {
-    const res = await api.delete(`/api/user/wishlist/remove`, {params:{productId:id}});
+    const res = await api.delete(`/api/user/wishlist/remove/${id}`);
     return res;
 }
 
