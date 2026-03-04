@@ -1,5 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Search, Filter, Package, Truck, CheckCircle, XCircle, ChevronDown, ChevronUp, MapPin, CreditCard, Calendar } from "lucide-react";
+import { getOrder } from "@/services/service";
+import { useToast } from "@/hooks/use-toast";
 
 type OrderItem = {
   id: string;
@@ -239,20 +241,22 @@ const formatDate = (dateStr: string) => {
 };
 
 const OrdersPage = () => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"All" | Order["status"]>("All");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [sortBy, setSortBy] = useState<"date-desc" | "date-asc" | "price-desc" | "price-asc">("date-desc");
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
-
+  const [orderList, setOrderList] = useState([]);
+  const [orderListRefresh, setOrderListRefresh] = useState(false);
   const filteredAndSortedOrders = useMemo(() => {
-    let filtered = dummyOrders;
+    let filtered = orderList;
 
     // Filter by search term (Order ID or Product Name)
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
-          order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.items.some((item) =>
+          order._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.orderItems.some((item) =>
             item.name.toLowerCase().includes(searchTerm.toLowerCase())
           )
       );
@@ -280,7 +284,8 @@ const OrdersPage = () => {
     });
 
     return sorted;
-  }, [searchTerm, statusFilter, sortBy]);
+  }, [orderList, searchTerm, statusFilter, sortBy]);
+  console.log(filteredAndSortedOrders)
 
   const toggleOrderDetails = (orderId: string) => {
     setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
@@ -296,6 +301,38 @@ const OrdersPage = () => {
       Returned: dummyOrders.filter((o) => o.status === "Returned").length,
     };
   }, []);
+
+
+
+  const handleGetOrder = async () => {
+    try {
+      const res = await getOrder();
+      console.log(res);
+      if (res.status === 200) {
+        setOrderList(res?.data?.updatedOrders);
+        // setCartSummary({
+        //   subtotal: res?.data?.cart?.subtotal || 0,
+        //   tax: res?.data?.cart?.tax || 0,
+        //   shipping: res?.data?.cart?.shipping || 0,
+        //   totalPrice: res?.data?.cart?.totalPrice || 0,
+        //   totalDiscount: res?.data?.cart?.totalDiscount || 0,
+        //   taxBreakdown: res?.data?.cart?.taxBreakdown || [],
+        // });
+        setOrderListRefresh(false);
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({ title: "Error Cart.", description: err?.response?.data?.message || err?.message, variant: "destructive" })
+    }
+  }
+
+  useEffect(() => {
+    if (orderList?.length === 0 || orderListRefresh) {
+      handleGetOrder();
+    }
+  }, [orderList?.length, orderListRefresh])
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4 md:p-8">
@@ -347,8 +384,8 @@ const OrdersPage = () => {
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${statusFilter === status
-                      ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                 >
                   {status} ({statusCounts[status]})
@@ -359,7 +396,7 @@ const OrdersPage = () => {
         </div>
 
         {/* Orders List */}
-        {filteredAndSortedOrders.length === 0 ? (
+        {filteredAndSortedOrders?.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-800 mb-2">No orders found</h3>
@@ -367,14 +404,14 @@ const OrdersPage = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredAndSortedOrders.map((order) => {
-              const statusConfig = getStatusConfig(order.status);
-              const StatusIcon = statusConfig.icon;
-              const isExpanded = expandedOrderId === order.id;
+            {filteredAndSortedOrders?.map((order) => {
+              const statusConfig = getStatusConfig(order?.status);
+              // const StatusIcon = statusConfig.icon;
+              const isExpanded = expandedOrderId === order?._id;
 
               return (
                 <div
-                  key={order.id}
+                  key={order?._id}
                   className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 group"
                 >
                   {/* Order Header */}
@@ -382,22 +419,22 @@ const OrdersPage = () => {
                     <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                          <h3 className="text-lg font-bold text-gray-900">{order.id}</h3>
-                          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border ${statusConfig.color}`}>
-                            <div className={`w-2 h-2 rounded-full ${statusConfig.dotColor} animate-pulse`} />
-                            <StatusIcon className="w-4 h-4" />
-                            <span>{order.status}</span>
+                          <h3 className="text-lg font-bold text-gray-900">ORD-{order?._id?.slice(-4)}</h3>
+                          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border ${statusConfig?.color}`}>
+                            <div className={`w-2 h-2 rounded-full ${statusConfig?.dotColor} animate-pulse`} />
+                            {/* <StatusIcon className="w-4 h-4" /> */}
+                            <span>{order?.orderStatus}</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1.5">
                             <Calendar className="w-4 h-4" />
-                            <span>{formatDate(order.date)}</span>
+                            <span>{formatDate(order?.createdAt)}</span>
                           </div>
-                          {order.trackingNumber && (
+                          {order?.trackingNumber && (
                             <div className="flex items-center gap-1.5">
                               <Truck className="w-4 h-4" />
-                              <span className="font-mono text-xs">{order.trackingNumber}</span>
+                              <span className="font-mono text-xs">{order?.trackingNumber}</span>
                             </div>
                           )}
                         </div>
@@ -405,7 +442,7 @@ const OrdersPage = () => {
 
                       <div className="text-right">
                         <p className="text-sm text-gray-500 mb-1">Total Amount</p>
-                        <p className="text-2xl font-bold text-gray-900">₹{order.total.toLocaleString()}</p>
+                        <p className="text-2xl font-bold text-gray-900">₹{order?.totalAmount?.toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
@@ -413,34 +450,48 @@ const OrdersPage = () => {
                   {/* Order Items */}
                   <div className="p-6">
                     <div className="space-y-4">
-                      {order.items.map((item, index) => (
+                      {order?.orderItems?.map((item, index) => (
                         <div
-                          key={item.id}
-                          className={`flex items-center gap-4 ${index !== order.items.length - 1 ? "pb-4 border-b border-gray-100" : ""
+                          key={item._id}
+                          className={`flex items-center gap-4 ${index !== order?.orderItems?.length - 1 ? "pb-4 border-b border-gray-100" : ""
                             }`}
                         >
                           <div className="relative group/img">
                             <img
-                              src={item.image}
-                              alt={item.name}
+                              src={item?.product?.images?.[0]}
+                              alt={item?.product?.name}
                               className="w-20 h-20 rounded-xl object-cover ring-2 ring-gray-100 group-hover/img:ring-blue-400 transition-all"
                             />
+
+                            {/* Hover Overlay */}
                             <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/10 rounded-xl transition-all" />
+
+                            {/* Discount Badge */}
+                            {item?.product?.discount > 0 && (
+                              <div className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-md">
+                                {item.product.discount}{item?.discountType === "percentage" ? "%" : "₹"} OFF
+                              </div>
+                            )}
                           </div>
 
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
-                              {item.name}
+                              {item?.product?.name}
                             </h4>
                             <p className="text-sm text-gray-500 mt-1">
-                              Qty: <span className="font-medium text-gray-700">{item.quantity}</span>
+                              Qty: <span className="font-medium text-gray-700">{item?.quantity}</span>
                             </p>
                           </div>
 
                           <div className="text-right">
-                            <p className="text-lg font-bold text-gray-900">₹{item.price.toLocaleString()}</p>
-                            {item.quantity > 1 && (
-                              <p className="text-xs text-gray-500">₹{(item.price / item.quantity).toLocaleString()} each</p>
+                            <div className="flex items-center gap-2">
+                              {/* Discounted Price */}
+                              <p className="text-lg font-bold text-gray-900">
+                                ₹{item?.finalPrice?.toLocaleString()}
+                              </p>
+                            </div>
+                            {item?.quantity > 1 && (
+                              <p className="text-xs text-gray-500">₹{(item?.price / item?.quantity).toLocaleString()} each</p>
                             )}
                           </div>
                         </div>
@@ -459,7 +510,7 @@ const OrdersPage = () => {
                             <p className="font-medium text-gray-900">{order.shippingAddress.name}</p>
                             <p>{order.shippingAddress.street}</p>
                             <p>
-                              {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.zip}
+                              {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.postalCode}
                             </p>
                           </div>
                         </div>
@@ -480,7 +531,7 @@ const OrdersPage = () => {
                   {/* Order Footer */}
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
                     <button
-                      onClick={() => toggleOrderDetails(order.id)}
+                      onClick={() => toggleOrderDetails(order._id)}
                       className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all group/btn"
                     >
                       <span>{isExpanded ? "Hide Details" : "View Details"}</span>

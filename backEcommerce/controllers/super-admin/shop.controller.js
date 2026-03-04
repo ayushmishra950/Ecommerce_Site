@@ -60,7 +60,7 @@ const createShop = async (req, res) => {
 
 const getMyShops = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req?.user?._id;
 
     const shops = await Shop.find({
       $or: [{ owners: userId }, { admins: userId }],

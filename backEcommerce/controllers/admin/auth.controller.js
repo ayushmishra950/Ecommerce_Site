@@ -273,7 +273,7 @@ exports.getAdminById = async (req, res) => {
      if (!shop) return res.status(404).json({ message: "Shop not found." });
 
     const admin = await Admin.findOne({_id:id, shopId:shopId})
-    .populate("shopId", "name email phone currency")
+    .populate("shopId", "name email phone currency taxPercentage shippingCharge freeShippingAbove")
     .select("-password");
     if (!admin) return res.status(404).json({ message: "Admin not found" });
 
@@ -320,6 +320,15 @@ exports.updateAdmin = async (req, res) => {
 
       if (storeSettings.currency)
         shop.currency = storeSettings.currency;
+
+      if (storeSettings.taxPercentage)
+        shop.taxPercentage = storeSettings.taxPercentage;
+
+      if (storeSettings.shippingCharge)
+        shop.shippingCharge = storeSettings.shippingCharge;
+
+      if (storeSettings.freeShippingAbove)
+        shop.freeShippingAbove = storeSettings.freeShippingAbove;
 
       await shop.save();
     }

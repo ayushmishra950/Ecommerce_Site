@@ -1,11 +1,12 @@
 const router = require("express").Router();
-const {getWishlist, addToWishlist, removeFromWishlist, clearWishlist} = require("../../controllers/user/wishlist.controller");
+const {getWishlist, toggleWishlist,allProductMoveToCart,moveToCart, clearWishlist} = require("../../controllers/user/wishlist.controller");
 
 
 
 router.get("/get", getWishlist);
-router.post("/add", addToWishlist);
-router.delete("/remove/:productId", removeFromWishlist);
+router.put("/toggle", toggleWishlist)
 router.delete("/clear", clearWishlist);
+router.patch("/movetocart", moveToCart);
+router.patch("/allmovetocart", allProductMoveToCart)
 
 module.exports = router;

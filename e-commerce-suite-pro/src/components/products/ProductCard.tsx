@@ -9,12 +9,14 @@ import { cn } from '@/lib/utils';
 import { addToCart, removeFromCart } from '@/redux-toolkit/slice/cartSlice';
 import { addAndRemoveWishList } from '@/redux-toolkit/slice/wishListSlice';
 import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
-import { addProductToWishlist, getProductToWishlist, removeProductToWishlist, clearWishlist, addCart } from "@/services/service";
+import { addAndRemoveProductWishList, getProductToWishlist, addCart } from "@/services/service";
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { calculateDiscount } from "@/services/allFunction";
 
 
 export const ProductCard = ({ product }) => {
+  console.log(product)
   const { user } = useAuth();
   const { toast } = useToast();
   // const [isWishlisted, setIsWishlisted] = useState(false);
@@ -35,16 +37,13 @@ export const ProductCard = ({ product }) => {
    console.log(item)
     try {
       let res = null;
-      if (item) {
-        res = await removeProductToWishlist(item?.product?._id);
-      }
-      else {
-        res = await addProductToWishlist(product?._id, user?.id);
-      }
+      res = await addAndRemoveProductWishList(product?._id);
+    
       console.log(res)
       if (res.status === 200 || res.status === 201) {
         dispatch(addAndRemoveWishList(product));
-        toast({ title: item?._id ? "Remove Item To Wishlist." : "Add Item To Wishlist.", description: res?.data?.message })
+        setWishListRefresh(true)
+        toast({ title: item?.product?._id ? "Remove Item To Wishlist." : "Add Item To Wishlist.", description: res?.data?.message })
       }
     }
     catch (err) {
@@ -87,9 +86,9 @@ export const ProductCard = ({ product }) => {
     };
   
     useEffect(() => {
-      // if (wishListRefresh || wishlist?.length){
+      if (wishListRefresh || wishList?.length===0){
     handleGetProducts()
-      // }
+      }
     }, [wishListRefresh, wishList?.length])
   
   if (!product) return null;
@@ -114,9 +113,9 @@ export const ProductCard = ({ product }) => {
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {discount > 0 && (
-            <Badge variant="destructive" className="font-semibold">
-              -{discount}%
+          {product?.discount > 0 && (
+            <Badge variant="destructive" className="font-semibold text-[9px] px-1 py-[1px] rounded-sm">
+              -{product?.discount}{product?.discountType==="percentage"?"%":"₹"} OFF
             </Badge>
           )}
           {!product.stock && (
@@ -174,14 +173,26 @@ export const ProductCard = ({ product }) => {
           <span className="text-sm text-muted-foreground">({product.numReviews})</span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-foreground">₹{product.price}</span>
-          {product.originalPrice && (
-            <span className="text-sm text-muted-foreground line-through">
-              ${product.originalPrice}
-            </span>
-          )}
-        </div>
+       <div className="flex items-center gap-2">
+  {product?.discount > 0 ? (
+    <>
+      {/* Discounted Price */}
+      <span className="text-lg font-bold text-foreground">
+        ₹{product.price - calculateDiscount(product)}
+      </span>
+
+      {/* Original Price */}
+      <span className="text-sm text-muted-foreground line-through">
+        ₹{product.price}
+      </span>
+    </>
+  ) : (
+    /* No Discount → Only Original Price */
+    <span className="text-lg font-bold text-foreground">
+      ₹{product?.price}
+    </span>
+  )}
+</div>
       </CardContent>
     </Card>
   );

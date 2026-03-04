@@ -119,11 +119,11 @@ export const getProductsByUsers = async () => {
     return res;
 }
 
-export const addProductToWishlist = async (id: string, userId: string) => {
-    console.log(id, userId)
-    const res = await api.post(`/api/user/wishlist/add`, { userId: userId, productId: id });
+export const addAndRemoveProductWishList = async (id: string) => {
+    const res = await api.put(`/api/user/wishlist/toggle`, { productId: id });
     return res;
 }
+
 
 
 export const getProductToWishlist = async () => {
@@ -132,14 +132,20 @@ export const getProductToWishlist = async () => {
 }
 
 
-export const removeProductToWishlist = async (id: string) => {
-    const res = await api.delete(`/api/user/wishlist/remove/${id}`);
+export const clearWishList = async (userId: string) => {
+    const res = await api.delete(`/api/user/wishlist/clear`, { params: { userId } });
+    return res;
+}
+
+export const moveToCart = async (userId: string, productId: string) => {
+    const res = await api.patch(`/api/user/wishlist/movetocart`, { userId, productId });
     return res;
 }
 
 
-export const clearWishlist = async (id: string, userId: string) => {
-    const res = await api.get(`/api/user/wishlist/clear`);
+
+export const allMoveToCart = async (userId: string) => {
+    const res = await api.patch(`/api/user/wishlist/allmovetocart`, { userId });
     return res;
 }
 
@@ -174,6 +180,37 @@ export const clearCart = async () => {
 }
 
 
+
+
+
+
+export const addOrder = async (shippingAddress: any, paymentMethod: any) => {
+    const res = await api.post(`/api/user/order/add`, { shippingAddress, paymentMethod });
+    return res;
+}
+
+
+export const updateOrder = async (obj) => {
+    const res = await api.patch(`/api/user/order/update`, obj);
+    return res;
+}
+
+export const getOrder = async () => {
+    const res = await api.get(`/api/user/order/my-orders`);
+    return res;
+}
+
+
+export const removeOrder = async (id: string) => {
+    const res = await api.delete(`/api/user/order/remove/${id}`);
+    return res;
+}
+
+
+export const clearOrder = async () => {
+    const res = await api.delete(`/api/user/order/clear`);
+    return res;
+}
 
 
 

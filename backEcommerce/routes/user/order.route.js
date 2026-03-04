@@ -53,7 +53,7 @@ const orderController = require("../../controllers/user/order.controller");
  *       201:
  *         description: Order placed successfully
  */
-router.post("/place",  orderController.placeOrder);
+router.post("/add", orderController.placeOrder);
 
 /**
  * @swagger
@@ -67,7 +67,7 @@ router.post("/place",  orderController.placeOrder);
  *       200:
  *         description: Orders fetched successfully
  */
-router.get("/my-orders",  orderController.getMyOrders);
+router.get("/my-orders", orderController.getMyOrders);
 
 /**
  * @swagger
@@ -90,7 +90,7 @@ router.get("/my-orders",  orderController.getMyOrders);
  *       404:
  *         description: Order not found
  */
-router.get("/:id",  orderController.getOrderById);
+router.get("/:id", orderController.getOrderById);
 
 /**
  * @swagger
@@ -113,6 +113,6 @@ router.get("/:id",  orderController.getOrderById);
  *       400:
  *         description: Order cannot be cancelled
  */
-router.put("/cancel/:id",  orderController.cancelOrder);
+router.put("/cancel/:id", orderController.cancelOrder);
 
 module.exports = router;

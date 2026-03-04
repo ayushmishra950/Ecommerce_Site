@@ -107,18 +107,13 @@ const orderSchema = new mongoose.Schema(
     // 📦 Products snapshot
     orderItems: [
       {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-          required: true,
-        },
-        name: String,        // snapshot
-        price: Number,      // snapshot
-        quantity: {
-          type: Number,
-          min: 1,
-          required: true,
-        },
+        product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+        name: String,
+        price: Number,
+        quantity: { type: Number, min: 1, required: true },
+        discount: { type: Number, default: 0 },
+        discountType: { type: String, enum: ["percentage", "fixed"], default: "percentage" },
+        finalPrice: { type: Number }, // price after discount
       },
     ],
 

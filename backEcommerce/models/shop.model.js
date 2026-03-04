@@ -77,6 +77,23 @@ const shopSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    taxPercentage: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    shippingCharge: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    freeShippingAbove: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true }
 );

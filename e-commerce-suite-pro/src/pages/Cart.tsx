@@ -28,6 +28,7 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { getCart, removeCart, clearCart, updateCart } from "@/services/service";
+import { calculateDiscount } from "@/services/allFunction";
 
 // Recommended Products Dummy Data
 const recommendedProducts = [
@@ -68,6 +69,14 @@ const Cart = () => {
   const [savedItems, setSavedItems] = useState<any[]>([]);
   const [cartList, setCartList] = useState([]);
   const [cartListRefresh, setCartListRefresh] = useState(false);
+  const [cartSummary, setCartSummary] = useState({
+    subtotal: 0,
+    tax: 0,
+    shipping: 0,
+    totalPrice: 0,
+    totalDiscount: 0,
+    taxBreakdown: []
+  });
 
 
   const handleUpdateCart = async (id, quantity, type) => {
@@ -104,7 +113,15 @@ const Cart = () => {
       const res = await getCart();
       console.log(res);
       if (res.status === 200) {
-        setCartList(res?.data?.cart?.[0]?.items);
+        setCartList(res?.data?.cart?.items);
+        setCartSummary({
+          subtotal: res?.data?.cart?.subtotal || 0,
+          tax: res?.data?.cart?.tax || 0,
+          shipping: res?.data?.cart?.shipping || 0,
+          totalPrice: res?.data?.cart?.totalPrice || 0,
+          totalDiscount: res?.data?.cart?.totalDiscount || 0,
+          taxBreakdown: res?.data?.cart?.taxBreakdown || [],
+        });
         setCartListRefresh(false);
       }
     }
@@ -115,56 +132,16 @@ const Cart = () => {
   }
 
   useEffect(() => {
-    if (cartList.length === 0 || cartListRefresh) {
+    if (cartList?.length === 0 || cartListRefresh) {
       handleGetCart();
     }
-  }, [cartList.length, cartListRefresh])
-  // Calculate totals
-  let subtotal = 0;
-  items?.forEach((item) => {
-    subtotal += item?.totalPrice || 0;
-  });
-
-  const shipping = subtotal > 500 ? 0 : 50;
-  const tax = subtotal * 0.18; // 18% GST
-  const discountAmount = (subtotal * discount) / 100;
-  const totalSavings = items?.reduce((acc, item) => {
-    const originalTotal = (item?.price) * item?.quantity;
-    const currentTotal = item?.price * item?.quantity;
-    return acc + (originalTotal - currentTotal);
-  }, 0);
-
-  const grandTotal = subtotal + shipping + tax - discountAmount;
+  }, [cartList?.length, cartListRefresh])
 
   // Coupon codes
   const coupons = {
     'SAVE10': { discount: 10, minOrder: 1000 },
     'SAVE20': { discount: 20, minOrder: 2000 },
     'FIRST50': { discount: 50, minOrder: 500 },
-  };
-
-  const applyCoupon = () => {
-    const coupon = coupons[couponCode.toUpperCase() as keyof typeof coupons];
-    if (coupon && subtotal >= coupon.minOrder) {
-      setDiscount(coupon.discount);
-      setAppliedCoupon(couponCode.toUpperCase());
-      toast({
-        title: "Coupon Applied! 🎉",
-        description: `You saved ${coupon.discount}% on your order`,
-      });
-    } else if (coupon) {
-      toast({
-        title: "Minimum Order Not Met",
-        description: `Add ₹${coupon.minOrder - subtotal} more to use this coupon`,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Invalid Coupon",
-        description: "Please enter a valid coupon code",
-        variant: "destructive",
-      });
-    }
   };
 
   const removeCoupon = () => {
@@ -249,7 +226,7 @@ const Cart = () => {
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
             <p className="text-gray-600">
-              {items.length} {items.length === 1 ? 'item' : 'items'} in your cart
+              {cartList.length} {cartList.length === 1 ? 'item' : 'items'} in your cart
             </p>
           </div>
           <Button variant="outline" asChild>
@@ -496,7 +473,7 @@ const Cart = () => {
                     onChange={(e) => setCouponCode(e.target.value)}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   />
-                  <Button onClick={applyCoupon} className="bg-yellow-600 hover:bg-yellow-700">
+                  <Button className="bg-yellow-600 hover:bg-yellow-700">
                     Apply
                   </Button>
                 </div>
@@ -528,29 +505,33 @@ const Cart = () => {
 
               <div className="p-6 space-y-4">
                 <div className="flex justify-between text-gray-700">
-                  <span>Subtotal ({items.length} items)</span>
-                  <span className="font-semibold">₹{subtotal.toLocaleString()}</span>
+                  <span>Subtotal ({cartList.length} items)</span>
+                  <span className="font-semibold">₹{cartSummary.subtotal.toLocaleString()}</span>
                 </div>
 
-                {totalSavings > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span className="flex items-center gap-1">
-                      <BadgePercent className="w-4 h-4" />
-                      Item Discount
-                    </span>
-                    <span className="font-semibold">-₹{totalSavings.toLocaleString()}</span>
-                  </div>
-                )}
+                {/* {totalSavings > 0 && ( */}
+                <div className="flex justify-between text-green-600">
+                  <span className="flex items-center gap-1">
+                    <BadgePercent className="w-4 h-4" />
+                    Item Discount
+                  </span>
+                  <span className="font-semibold">-₹
+                    {cartSummary.totalDiscount.toLocaleString()}
+                  </span>
+                </div>
+                {/* )} */}
 
-                {discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span className="flex items-center gap-1">
-                      <Tag className="w-4 h-4" />
-                      Coupon Discount ({discount}%)
-                    </span>
-                    <span className="font-semibold">-₹{discountAmount.toFixed(2)}</span>
-                  </div>
-                )}
+                {/* {discount > 0 && ( */}
+                <div className="flex justify-between text-green-600">
+                  <span className="flex items-center gap-1">
+                    <Tag className="w-4 h-4" />
+                    Coupon Discount ({discount}%)
+                  </span>
+                  <span className="font-semibold">-₹
+                    {/* {discountAmount.toFixed(2)} */}
+                  </span>
+                </div>
+                {/* )} */}
 
                 <div className="flex justify-between text-gray-700">
                   <span className="flex items-center gap-1">
@@ -558,31 +539,39 @@ const Cart = () => {
                     Shipping
                   </span>
                   <span className="font-semibold">
-                    {shipping === 0 ? (
+                    {cartSummary.shipping === 0 ? (
                       <span className="text-green-600">FREE</span>
                     ) : (
-                      `₹${shipping}`
+                      `₹${cartSummary.shipping}`
                     )}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-gray-700">
                   <span>Tax (GST 18%)</span>
-                  <span className="font-semibold">₹{tax.toFixed(2)}</span>
+                  <span className="font-semibold">₹{cartSummary.tax.toFixed(2)}</span>
                 </div>
+                {cartSummary.taxBreakdown?.map((shop: any) => (
+                  <div key={shop.shopId} className="flex justify-between text-sm text-gray-600">
+                    <span>
+                      {shop.shopName} Tax ({shop.taxPercentage}%)
+                    </span>
+                    <span>₹{shop.taxAmount.toFixed(2)}</span>
+                  </div>
+                ))}
 
                 <Separator />
 
                 <div className="flex justify-between text-xl font-bold text-gray-900">
                   <span>Total</span>
-                  <span className="text-yellow-600">₹{grandTotal.toFixed(2)}</span>
+                  <span className="text-yellow-600">₹{cartSummary.totalPrice}</span>
                 </div>
 
-                {shipping > 0 && (
+                {cartSummary?.shipping > 0 && (
                   <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
                     <p className="text-sm text-orange-800">
                       <Gift className="w-4 h-4 inline mr-1" />
-                      Add <span className="font-bold">₹{(500 - subtotal).toFixed(2)}</span> more for FREE shipping!
+                      Add <span className="font-bold">₹{(500 - cartSummary?.subtotal).toFixed(2)}</span> more for FREE shipping!
                     </p>
                   </div>
                 )}

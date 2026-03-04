@@ -119,7 +119,8 @@ const AdminProducts = () => {
         </div>
         {/* Products Grid */}
        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
+          {filteredProducts?.length > 0 ? (
+          filteredProducts.map((product) => (
 
 <Card key={product._id} className="overflow-hidden flex flex-col">
   <div className="aspect-square relative bg-muted overflow-hidden group">
@@ -210,7 +211,12 @@ const AdminProducts = () => {
   </CardContent>
 </Card>
 
-          ))}
+          ))
+        ) :
+        <div className='col-span-full flex justify-center items-center mt-[140px]'>
+        <p className='text-gray-500 font-medium'>No Product Found.</p>
+        </div>
+        }
         </div>
       </div>
     </>

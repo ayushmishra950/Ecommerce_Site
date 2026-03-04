@@ -12,7 +12,7 @@ import { getAdminData, updateAdminData } from "@/services/service";
 const AdminSettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [storeSettings, setStoreSettings] = useState({ storeName: '', storeEmail: '', currency: '' });
+  const [storeSettings, setStoreSettings] = useState({ storeName: '', storeEmail: '', currency: '', taxPercentage: "0", shippingCharge: "0", freeShippingAbove: "0", });
   const [userData, setUserData] = useState<any>(null);
   const [profile, setProfile] = useState({ name: '', email: '' });
   const [security, setSecurity] = useState({ twoFactorAuth: true });
@@ -51,10 +51,14 @@ const AdminSettings = () => {
   useEffect(() => {
     if (!userData) return;
     // Store
+    console.log(userData)
     setStoreSettings({
       storeName: userData?.shopId?.name || "",
       storeEmail: userData?.shopId?.email || "",
       currency: userData?.shopId?.currency || "",
+      taxPercentage: userData?.shopId?.taxPercentage || "0",
+      shippingCharge: userData?.shopId?.shippingCharge || "0",
+      freeShippingAbove: userData?.shopId?.freeShippingAbove || "0",
     });
     // Profile
     setProfile({
@@ -87,7 +91,8 @@ const AdminSettings = () => {
           <Store className="h-5 w-5 text-muted-foreground" />
           <CardTitle>Store Settings</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 max-w-xl">
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+
           <div className="space-y-1">
             <Label>Store Name</Label>
             <Input
@@ -104,9 +109,6 @@ const AdminSettings = () => {
               type="email"
               disabled
               value={storeSettings.storeEmail}
-              onChange={(e) =>
-                setStoreSettings({ ...storeSettings, storeEmail: e.target.value })
-              }
             />
           </div>
 
@@ -119,6 +121,49 @@ const AdminSettings = () => {
               }
             />
           </div>
+
+          <div className="space-y-1">
+            <Label>Tax Percentage (%)</Label>
+            <Input
+              type="number"
+              value={storeSettings.taxPercentage}
+              onChange={(e) =>
+                setStoreSettings({
+                  ...storeSettings,
+                  taxPercentage: (e.target.value),
+                })
+              }
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label>Shipping Charge</Label>
+            <Input
+              type="number"
+              value={storeSettings.shippingCharge}
+              onChange={(e) =>
+                setStoreSettings({
+                  ...storeSettings,
+                  shippingCharge: (e.target.value),
+                })
+              }
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label>Free Shipping Above</Label>
+            <Input
+              type="number"
+              value={storeSettings.freeShippingAbove}
+              onChange={(e) =>
+                setStoreSettings({
+                  ...storeSettings,
+                  freeShippingAbove: (e.target.value),
+                })
+              }
+            />
+          </div>
+
         </CardContent>
       </Card>
 

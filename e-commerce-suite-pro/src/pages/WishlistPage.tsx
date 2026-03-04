@@ -28,13 +28,15 @@ import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/redux-toolkit/hooks/hook";
 import { addToCart, removeFromCart } from '@/redux-toolkit/slice/cartSlice';
 import { addAndRemoveWishList } from '@/redux-toolkit/slice/wishListSlice';
-import { addProductToWishlist, getProductToWishlist, removeProductToWishlist, clearWishlist } from "@/services/service";
+import { addAndRemoveProductWishList, getProductToWishlist, clearWishList,allMoveToCart, moveToCart } from "@/services/service";
+import { useAuth } from "@/context/AuthContext";
 
 
 const WishlistPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const {user} = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high'>('name');
@@ -60,7 +62,21 @@ const WishlistPage = () => {
 
   const handleProductRemoveFromWishlist = async (id) => {
     try {
-      const res = await removeProductToWishlist(id);
+      const res = await addAndRemoveProductWishList(id);
+       console.log(res)
+      if (res.status === 200) {
+       toast({title:"Product remove from Wishlist.", description:res?.data?.message})
+        setWishListRefresh(true);
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({title:"Error remove from Wishlist.", description:err?.response?.data?.message, variant:"destructive"})
+    }
+  };
+   const handleClearWishList = async () => {
+    try {
+      const res = await clearWishList(user?.id);
        console.log(res)
       if (res.status === 200) {
        toast({title:"Product remove from Wishlist.", description:res?.data?.message})
@@ -74,9 +90,9 @@ const WishlistPage = () => {
   };
 
   useEffect(() => {
-    // if (wishListRefresh || wishlist?.length){
+    if (wishListRefresh || wishlist?.length===0){
   handleGetProducts()
-    // }
+    }
   }, [wishListRefresh, wishlist?.length])
 
   // Filter and sort items
@@ -96,30 +112,31 @@ const WishlistPage = () => {
       }
     });
 
-  const handleRemoveFromWishlist = (item: any) => {
-    dispatch(addAndRemoveWishList(item));
-    toast({
-      title: "Removed from Wishlist",
-      description: `${item.name} has been removed from your wishlist`,
-      variant: "destructive",
-    });
+  const handleMoveToCart = async(itemId:string) => {
+         try{
+      const res = await moveToCart(user?.id, itemId);
+      if(res.status===200){
+        toast({title:"Product Move To Cart.", description:res?.data?.message});
+        setWishListRefresh(true);
+        navigate("/cart");
+      }
+         }
+         catch(err){
+          toast({title:"Error Product Move Cart.", description:err?.response?.data?.message|| err?.message, variant:"destructive"})
+         }
   };
-
-  const handleAddToCart = (item: any) => {
-    dispatch(addToCart(item));
-    toast({
-      title: "Added to Cart! 🛒",
-      description: `${item.name} has been added to your cart`,
-    });
-  };
-
-  const handleMoveToCart = (item: any) => {
-    dispatch(addToCart(item));
-    dispatch(addAndRemoveWishList(item));
-    toast({
-      title: "Moved to Cart! 🛒",
-      description: `${item.name} has been moved from wishlist to cart`,
-    });
+  const handleAllMoveToCart = async() => {
+         try{
+      const res = await allMoveToCart(user?.id);
+      if(res.status===200){
+        toast({title:"All Products Move To Cart.", description:res?.data?.message});
+        setWishListRefresh(true);
+        navigate("/cart");
+      }
+         }
+         catch(err){
+          toast({title:"Error All Products Move Cart.", description:err?.response?.data?.message|| err?.message, variant:"destructive"})
+         }
   };
 
   const calculateDiscount = (item: any) => {
@@ -397,7 +414,7 @@ const WishlistPage = () => {
                     <div className="flex gap-2">
                       <Button
                         className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700"
-                        onClick={() => handleMoveToCart(item)}
+                        onClick={() => handleMoveToCart(item?.product?._id)}
                         disabled={!isInStock}
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />
@@ -419,7 +436,7 @@ const WishlistPage = () => {
         )}
 
         {/* Action Buttons */}
-        {wishlistItems.length > 0 && (
+        {filteredItems.length > 0 && (
           <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
@@ -434,13 +451,7 @@ const WishlistPage = () => {
               <div className="flex gap-3">
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    wishlistItems.forEach(item => dispatch(addAndRemoveWishList(item)));
-                    toast({
-                      title: "Wishlist Cleared",
-                      description: "All items have been removed from your wishlist",
-                    });
-                  }}
+                  onClick={handleClearWishList}
                   className="hover:bg-yellow-50 hover:text-yellow-600 hover:border-yellow-200"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
@@ -448,18 +459,7 @@ const WishlistPage = () => {
                 </Button>
                 <Button
                   className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700"
-                  onClick={() => {
-                    wishlistItems.forEach(item => {
-                      if (item.stock > 0) {
-                        dispatch(addToCart(item));
-                      }
-                    });
-                    toast({
-                      title: "Added to Cart! 🛒",
-                      description: `All available items have been added to your cart`,
-                    });
-                    navigate('/cart');
-                  }}
+                  onClick={handleAllMoveToCart}
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Add All to Cart

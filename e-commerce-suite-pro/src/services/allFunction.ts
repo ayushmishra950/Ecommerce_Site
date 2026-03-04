@@ -21,6 +21,19 @@ export function formatDate(date?: string | Date, forInput = false): string {
 }
 
 
+// Example: product price = 1000, discount = 10, type = "percentage"
+export const calculateDiscount = (product: any) => {
+  if (!product.discount || product.discount <= 0) return 0;
+
+  if (product.discountType === "percentage") {
+    return (product.price * product.discount) / 100;
+  } else if (product.discountType === "fixed") {
+    return product.discount;
+  }
+  return 0;
+};
+
+
 
 
 export const getStatusVariant = (

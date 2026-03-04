@@ -33,7 +33,7 @@ const validateShopAndAdmin = async (shopId, adminId) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { shopId, adminId, name,price,category, stock, description, isActive  } = req.body;
+    const { shopId, adminId, name,price,category, stock, description, isActive, discount, discountType  } = req.body;
     const images = req.files?.images || [];
    
     if(!shopId || !adminId || !name || !category  || !price ||  !stock || !description || !isActive){
@@ -73,7 +73,9 @@ const createProduct = async (req, res) => {
       shopId,
       adminId,
       images: imageUrls,
-      category
+      category,
+      discount,
+       discountType
     });
 
    await Category.findByIdAndUpdate(category, {$addToSet: {product: [product?._id]}},{new:true})
@@ -162,7 +164,7 @@ const getProductById = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    const { shopId, adminId, name,price,category, stock, description, isActive } = req.body;
+    const { shopId, adminId, name,price,category, stock, description, isActive, discount, discountType } = req.body;
     const images = req.files?.images || [];
 
     // ✅ 1. Find Product
@@ -225,6 +227,8 @@ const updateProduct = async (req, res) => {
     product.description = description ?? product.description;
     product.isActive = isActive ?? product.isActive;
     product.images = imageUrls;
+    product.discount = discount;
+    product.discountType = discountType;
 
     await product.save();
 
