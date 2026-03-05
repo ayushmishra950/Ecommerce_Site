@@ -314,6 +314,7 @@ import { useAuth } from "@/context/AuthContext";
 
 interface ShippingAddress {
   name: string;
+  email:string;
   phone: string;
   address: string;
   city: string;
@@ -339,6 +340,7 @@ const Checkout = () => {
   });
   const [shipping, setShipping] = useState<ShippingAddress>({
     name: "",
+    email:"",
     phone: "",
     address: "",
     city: "",
@@ -409,7 +411,7 @@ const Checkout = () => {
 
   // 🔹 Place order
   const handlePlaceOrder = async () => {
-    if (!shipping.name || !shipping.phone || !shipping.address || !shipping.city) {
+    if (!shipping.name || !shipping?.email || !shipping.phone || !shipping.address || !shipping.city) {
       toast({
         title: "Error",
         description: "Please fill all required fields",
@@ -461,6 +463,7 @@ const Checkout = () => {
             <CardContent className="p-6 space-y-4">
               <h2 className="text-xl font-semibold">Shipping Address</h2>
               <Input name="name" placeholder="Full Name" value={shipping.name} onChange={handleChange} />
+               <Input name="email" placeholder="Email" value={shipping.email} onChange={handleChange} />
               <Input name="phone" placeholder="Phone" value={shipping.phone} onChange={handleChange} />
               <Input name="address" placeholder="Street Address" value={shipping.address} onChange={handleChange} />
               <div className="grid grid-cols-2 gap-4">

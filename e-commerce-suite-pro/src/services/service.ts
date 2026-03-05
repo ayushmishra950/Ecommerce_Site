@@ -100,6 +100,18 @@ export const getAllCustomer = async() => {
 }
 
 
+export const blockCustomer = async(obj) => {
+    const res = await api.post("/api/admin/block/add", obj);
+    return res;
+}
+
+
+export const unBlockCustomer = async(obj) => {
+    const res = await api.patch("/api/admin/block/update", obj);
+    return res;
+}
+
+
 // User Controllers for Only Users Not Admin==================================
 //===============================================================================
 //===============================================================================

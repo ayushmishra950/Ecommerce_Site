@@ -171,7 +171,7 @@ const placeOrder = async (req, res) => {
     const { shippingAddress, paymentMethod } = req.body;
 
     // 🔹 Basic validation
-    if (!shippingAddress?.address || !shippingAddress?.city) {
+    if (!shippingAddress?.address || !shippingAddress?.city ) {
       return res.status(400).json({
         success: false,
         message: "Complete shipping address required",

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -17,7 +18,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {getAllOrder} from "@/services/service";
+import {getAllCustomer, blockCustomer, unBlockCustomer} from "@/services/service";
+import {formatDate} from "@/services/allFunction";
+import {Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetOverlay, SheetPortal, SheetTitle, SheetTrigger,} from "@/components/ui/sheet";
 
 const customers = [
   {
@@ -68,11 +71,18 @@ const AdminCustomers = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [customerList, setCustomerList] = useState([]);
+  const [customerDetailOpen,setCustomerDetailOpen] = useState(false);
+    const [blockDetailOpen,setBlockDetailOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+const [reason, setReason] = useState("");
+const[blockLoading, setBlockLoading] = useState(false);
+const currentDate = new Date().toISOString().split("T")[0];
 
-  const filteredCustomers = customers.filter((customer) => {
+  const filteredCustomers = customerList?.filter((customer) => {
     const matchesSearch =
-      customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      customer.email.toLowerCase().includes(searchQuery.toLowerCase());
+      customer?.shippingAddress?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      customer?.shippingAddress?.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      customer?.shippingAddress?.phone.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus =
       statusFilter === 'all' || customer.status === statusFilter;
@@ -80,14 +90,27 @@ const AdminCustomers = () => {
     return matchesSearch && matchesStatus;
   });
 
-
+  const handleBlockAndUnBlockCustomer = async() => {
+    try{
+       let obj = {shopId:selectedCustomer?.shop, userId:selectedCustomer?.user, reason:reason};
+       setBlockLoading(true);
+       const res =await blockCustomer(obj);
+    }
+    catch(err){
+        console.log(err);
+       }
+       finally{
+        setBlockLoading(false);
+        setBlockDetailOpen(false);
+       }
+  }
   
     const handleGetCustomer = async() => {
        try{
-         const res = await getAllOrder();
+         const res = await getAllCustomer();
          console.log(res)
          if(res.status===200){
-          setCustomerList(res.data?.data)
+          setCustomerList(res?.data?.data)
          }
        }
        catch(err){
@@ -98,8 +121,9 @@ const AdminCustomers = () => {
       handleGetCustomer()
     },[])
   
-
+  console.log(selectedCustomer)
   return (
+    <>
     <div className="space-y-6">
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
@@ -145,31 +169,32 @@ const AdminCustomers = () => {
                 {filteredCustomers.map((customer) => (
                   <tr
                     key={customer.id}
-                    className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                    className="border-b last:border-0 hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={()=>{setSelectedCustomer(customer);setCustomerDetailOpen(true)}}
                   >
                     <td className="py-4 px-6">
                       <div>
-                        <p className="text-sm font-medium">{customer.name}</p>
+                        <p className="text-sm font-medium">{customer?.shippingAddress?.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {customer.email}
+                          {customer?.shippingAddress?.email}
                         </p>
                       </div>
                     </td>
 
-                    <td className="py-4 px-6 text-sm">{customer.orders}</td>
+                    <td className="py-4 px-6 text-sm">{customer?.orderItems?.length}</td>
 
                     <td className="py-4 px-6 text-sm font-medium">
-                      ${customer.totalSpent}
+                      ₹{customer?.totalAmount}
                     </td>
 
                     <td className="py-4 px-6">
-                      <Badge variant={getStatusVariant(customer.status)}>
-                        {customer.status}
+                      <Badge variant={getStatusVariant("active")}>
+                        {"Active"}
                       </Badge>
                     </td>
 
                     <td className="py-4 px-6 text-sm text-muted-foreground">
-                      {customer.joined}
+                      {formatDate(customer?.createdAt)}
                     </td>
 
                     <td className="py-4 px-6">
@@ -180,12 +205,12 @@ const AdminCustomers = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e)=>{e.stopPropagation();setSelectedCustomer(customer);setCustomerDetailOpen(true)}} className='cursor-pointer'>
                             <Eye className="h-4 w-4 mr-2" />
                             View Profile
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <UserX className="h-4 w-4 mr-2" />
+                          <DropdownMenuItem onClick={(e) => {e.stopPropagation();setSelectedCustomer(customer);setBlockDetailOpen(true)}} className='cursor-pointer'>
+                            <UserX className="h-4 w-4 mr-2 " />
                             Block Customer
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -199,6 +224,137 @@ const AdminCustomers = () => {
         </CardContent>
       </Card>
     </div>
+   <Dialog open={blockDetailOpen} onOpenChange={setBlockDetailOpen}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Block Customer</DialogTitle>
+      <DialogDescription>
+        Please provide the details before blocking this customer.
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="space-y-4 mt-4">
+
+      {/* Block Date */}
+      <div>
+        <label className="text-sm font-medium">Customer Name</label>
+        <input
+          type="text"
+          value={selectedCustomer?.shippingAddress?.name}
+          className="w-full border rounded-md px-3 py-2 mt-1"
+          readOnly
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium">Block Date</label>
+        <input
+          type="date"
+          defaultValue={currentDate}
+          className="w-full border rounded-md px-3 py-2 mt-1"
+          readOnly
+        />
+      </div>
+
+      {/* Reason */}
+      <div>
+        <label className="text-sm font-medium">Reason</label>
+        <textarea
+          placeholder="Enter reason for blocking this customer..."
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          className="w-full border rounded-md px-3 py-2 mt-1 min-h-[100px]"
+        />
+      </div>
+
+      {/* Button */}
+      <div className="flex justify-end">
+        <button
+        disabled={blockLoading || !reason}
+        onClick={handleBlockAndUnBlockCustomer}
+          className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md"
+        >
+          Block Customer
+        </button>
+      </div>
+
+    </div>
+  </DialogContent>
+</Dialog>
+   <Sheet open={customerDetailOpen} onOpenChange={setCustomerDetailOpen}>
+  <SheetContent className="overflow-y-auto w-[500px]">
+    <SheetHeader>
+      <SheetTitle>Customer Detail</SheetTitle>
+      <SheetDescription>Order Information</SheetDescription>
+    </SheetHeader>
+
+    {selectedCustomer && (
+      <div className="mt-6 space-y-6">
+
+        {/* Customer Info */}
+        <div className="border rounded-lg p-4">
+          <h3 className="font-semibold text-lg mb-2">Customer Info</h3>
+          <p><b>Name:</b> {selectedCustomer.shippingAddress?.name}</p>
+          <p><b>Email:</b> {selectedCustomer.shippingAddress?.email}</p>
+          <p><b>Phone:</b> {selectedCustomer.shippingAddress?.phone}</p>
+        </div>
+
+        {/* Address */}
+        <div className="border rounded-lg p-4">
+          <h3 className="font-semibold text-lg mb-2">Shipping Address</h3>
+          <p>{selectedCustomer.shippingAddress?.address}</p>
+          <p>{selectedCustomer.shippingAddress?.city}</p>
+        </div>
+
+        {/* Order Items */}
+        <div className="border rounded-lg p-4">
+          <h3 className="font-semibold text-lg mb-3">Order Items</h3>
+
+          {selectedCustomer.orderItems?.map((item) => (
+            <div
+              key={item._id}
+              className="flex justify-between border-b py-2"
+            >
+              <div>
+                <p className="font-medium">{item.name}</p>
+                <p className="text-sm text-gray-500">
+                  Qty: {item.quantity} | Price: ₹{item.price}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Discount: {item.discount} {item.discountType==="percentage"?"%" :"₹"}
+                </p>
+              </div>
+
+              <div className="font-semibold">
+                ₹{item.finalPrice}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Payment Info */}
+        <div className="border rounded-lg p-4">
+          <h3 className="font-semibold text-lg mb-2">Payment Info</h3>
+          <p><b>Method:</b> {selectedCustomer.paymentMethod}</p>
+          <p><b>Status:</b> {selectedCustomer.paymentStatus}</p>
+          <p><b>Order Status:</b> {selectedCustomer.orderStatus}</p>
+        </div>
+
+        {/* Price Summary */}
+        <div className="border rounded-lg p-4">
+          <h3 className="font-semibold text-lg mb-2">Price Summary</h3>
+          <p>Subtotal: ₹{selectedCustomer.subtotal}</p>
+          <p>Tax: ₹{selectedCustomer.tax}</p>
+          <p>Shipping: ₹{selectedCustomer.shippingCharge}</p>
+          <p className="font-bold text-lg">
+            Total: ₹{selectedCustomer.totalAmount}
+          </p>
+        </div>
+
+      </div>
+    )}
+  </SheetContent>
+</Sheet>
+    </>
   );
 };
 
