@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Eye, MoreHorizontal, UserX } from 'lucide-react';
+import { Search, Eye, MoreHorizontal, UserX, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,9 +18,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {getAllCustomer, blockCustomer, unBlockCustomer} from "@/services/service";
+import {getAllCustomer, blockAndUnBlockCustomer, getAllBlockCustomerList} from "@/services/service";
 import {formatDate} from "@/services/allFunction";
 import {Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetOverlay, SheetPortal, SheetTitle, SheetTrigger,} from "@/components/ui/sheet";
+import { useToast } from '@/hooks/use-toast';
 
 const customers = [
   {
@@ -68,12 +69,15 @@ const getStatusVariant = (
 };
 
 const AdminCustomers = () => {
+  const {toast} = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [customerList, setCustomerList] = useState([]);
+  const [blockCustomerList, setBlockCustomerList] = useState([]);
   const [customerDetailOpen,setCustomerDetailOpen] = useState(false);
     const [blockDetailOpen,setBlockDetailOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [blockListRefresh, setBlockListRefresh] = useState(false);
 const [reason, setReason] = useState("");
 const[blockLoading, setBlockLoading] = useState(false);
 const currentDate = new Date().toISOString().split("T")[0];
@@ -94,16 +98,38 @@ const currentDate = new Date().toISOString().split("T")[0];
     try{
        let obj = {shopId:selectedCustomer?.shop, userId:selectedCustomer?.user, reason:reason};
        setBlockLoading(true);
-       const res =await blockCustomer(obj);
+       const res =await blockAndUnBlockCustomer(obj);
+       console.log(res)
     }
     catch(err){
         console.log(err);
+        toast({title:"Block Customer Failed.", description:err?.response?.data?.message || err?.message, variant:"destructive"})
        }
        finally{
         setBlockLoading(false);
         setBlockDetailOpen(false);
+        setBlockListRefresh(true);
        }
   }
+
+  const handleGetBlockCustomerList = async() => {
+       try{
+         const res = await getAllBlockCustomerList();
+         console.log(res)
+         if(res.status===200){
+          setBlockCustomerList(res?.data?.blockList);
+          setBlockListRefresh(false);
+         }
+       }
+       catch(err){
+        console.log(err);
+       }
+    }
+    useEffect(()=>{
+      if(blockListRefresh || blockCustomerList?.length === 0){
+      handleGetBlockCustomerList()
+      }
+    },[blockListRefresh, blockCustomerList.length])
   
     const handleGetCustomer = async() => {
        try{
@@ -166,7 +192,9 @@ const currentDate = new Date().toISOString().split("T")[0];
                 </tr>
               </thead>
               <tbody>
-                {filteredCustomers.map((customer) => (
+                {filteredCustomers.map((customer) => {
+                  const isBlocked = blockCustomerList.find((v)=> v?.user===customer?.user)
+                  return(
                   <tr
                     key={customer.id}
                     className="border-b last:border-0 hover:bg-muted/30 transition-colors cursor-pointer"
@@ -188,8 +216,8 @@ const currentDate = new Date().toISOString().split("T")[0];
                     </td>
 
                     <td className="py-4 px-6">
-                      <Badge variant={getStatusVariant("active")}>
-                        {"Active"}
+                      <Badge variant={getStatusVariant(isBlocked?"blocked":"active")}>
+                        {isBlocked?"Block":"Active"}
                       </Badge>
                     </td>
 
@@ -211,13 +239,14 @@ const currentDate = new Date().toISOString().split("T")[0];
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={(e) => {e.stopPropagation();setSelectedCustomer(customer);setBlockDetailOpen(true)}} className='cursor-pointer'>
                             <UserX className="h-4 w-4 mr-2 " />
-                            Block Customer
+                           {isBlocked?"UnBlock":"Block"} Customer
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
                   </tr>
-                ))}
+                )}
+                )}
               </tbody>
             </table>
           </div>
@@ -273,6 +302,7 @@ const currentDate = new Date().toISOString().split("T")[0];
         onClick={handleBlockAndUnBlockCustomer}
           className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md"
         >
+          {blockLoading && <Loader2 />}
           Block Customer
         </button>
       </div>

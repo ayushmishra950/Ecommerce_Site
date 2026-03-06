@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import RatingModal from "@/card/RatingModal";
 
 const OrderSuccess: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
+    const [isRatingOpen, setIsRatingOpen] = useState(false);
+
 
   return (
+    <>
+        <RatingModal isOpen={isRatingOpen} onOpenChange={setIsRatingOpen} />
     <div className="container mx-auto py-16 text-center">
       <h1 className="text-4xl font-bold text-green-600 mb-4">Thank You!</h1>
       <p className="text-lg mb-6">Your order <span className="font-semibold">{orderId}</span> has been placed successfully.</p>
@@ -19,6 +24,7 @@ const OrderSuccess: React.FC = () => {
         </Link>
       </div>
     </div>
+    </>
   );
 };
 
