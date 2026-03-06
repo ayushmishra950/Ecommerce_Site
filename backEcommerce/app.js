@@ -13,6 +13,7 @@ const orderRoutes = require("./routes/user/order.route");
 const paymentRoutes = require("./routes/user/payment.route");
 const productRoutes = require("./routes/user/product.route");
 const wishlistRoutes = require("./routes/user/wishlist.route");
+const ratingRoutes = require("./routes/user/rating.route");
 
 // Admin k liye
 const adminAuthRoutes = require("./routes/admin/auth.route");
@@ -44,7 +45,8 @@ app.use("/api/user/cart", protect, cartRoutes);
 app.use("/api/user/order", protect, orderRoutes);
 app.use("/api/user/payment", protect, paymentRoutes);
 app.use("/api/user/product", protect, productRoutes);
-app.use("/api/user/wishlist",protect,  wishlistRoutes);
+app.use("/api/user/wishlist", protect, wishlistRoutes);
+app.use("/api/user/rating", protect, ratingRoutes);
 
 //  Admin Routes
 app.use("/api/admin/auth", adminAuthRoutes);
@@ -53,7 +55,7 @@ app.use("/api/admin/order", protect, adminOrderRoutes);
 app.use("/api/admin/coupon", protect, adminCouponRoutes);
 app.use("/api/admin/category", protect, adminCategoryRoutes);
 app.use("/api/admin/user", protect, adminUserRoutes);
-app.use("/api/admin/block",protect,  adminBlockRoutes);
+app.use("/api/admin/block", protect, adminBlockRoutes);
 // Super Admin Routes
 app.use("/api/superadmin/shop", superAdminShopRoute);
 

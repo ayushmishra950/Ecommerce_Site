@@ -88,24 +88,24 @@ export const updateAdminData = async (id: string, shopId: string, storeSettings:
 }
 
 
-export const getAllOrder = async() => {
+export const getAllOrder = async () => {
     const res = await api.get("/api/admin/order/get");
     return res;
 }
 
 
-export const getAllCustomer = async() => {
+export const getAllCustomer = async () => {
     const res = await api.get("/api/admin/user/get");
     return res;
 }
 
 
-export const blockAndUnBlockCustomer = async(obj) => {
+export const blockAndUnBlockCustomer = async (obj) => {
     const res = await api.patch("/api/admin/block/toggle", obj);
     return res;
 }
 
-export const getAllBlockCustomerList = async() => {
+export const getAllBlockCustomerList = async () => {
     const res = await api.get("/api/admin/block/get");
     return res;
 }
@@ -239,6 +239,18 @@ export const removeOrder = async (id: string) => {
 
 export const clearOrder = async () => {
     const res = await api.delete(`/api/user/order/clear`);
+    return res;
+}
+
+
+export const addRating = async (obj: any) => {
+    const res = await api.post(`/api/user/rating/add`, obj);
+    return res;
+}
+
+
+export const getRating = async (productId: string) => {
+    const res = await api.get(`/api/user/rating/get`, { params: { productId } });
     return res;
 }
 

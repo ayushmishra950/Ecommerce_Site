@@ -1,29 +1,31 @@
 import React, { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import RatingModal from "@/card/RatingModal";
 
 const OrderSuccess: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
-    const [isRatingOpen, setIsRatingOpen] = useState(false);
+  const [isRatingOpen, setIsRatingOpen] = useState(true);
+  const location = useLocation();
+  const cartList = location.state?.cartList;
 
 
   return (
     <>
-        <RatingModal isOpen={isRatingOpen} onOpenChange={setIsRatingOpen} />
-    <div className="container mx-auto py-16 text-center">
-      <h1 className="text-4xl font-bold text-green-600 mb-4">Thank You!</h1>
-      <p className="text-lg mb-6">Your order <span className="font-semibold">{orderId}</span> has been placed successfully.</p>
-      
-      <div className="space-y-4">
-        <Link to="/" className="block">
-          <Button>Continue Shopping</Button>
-        </Link>
-        <Link to="/orderpage" className="block">
-          <Button variant="outline">View My Orders</Button>
-        </Link>
+      <RatingModal isOpen={isRatingOpen} onOpenChange={setIsRatingOpen} productName="" cartList={cartList} />
+      <div className="container mx-auto py-16 text-center">
+        <h1 className="text-4xl font-bold text-green-600 mb-4">Thank You!</h1>
+        <p className="text-lg mb-6">Your order <span className="font-semibold">{orderId}</span> has been placed successfully.</p>
+
+        <div className="space-y-4">
+          <Link to="/" className="block">
+            <Button>Continue Shopping</Button>
+          </Link>
+          <Link to="/orderpage" className="block">
+            <Button variant="outline">View My Orders</Button>
+          </Link>
+        </div>
       </div>
-    </div>
     </>
   );
 };

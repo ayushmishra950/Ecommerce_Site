@@ -314,7 +314,7 @@ import { useAuth } from "@/context/AuthContext";
 
 interface ShippingAddress {
   name: string;
-  email:string;
+  email: string;
   phone: string;
   address: string;
   city: string;
@@ -326,7 +326,7 @@ interface ShippingAddress {
 const Checkout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const {user} = useAuth();
+  const { user } = useAuth();
   const items = useSelector((state: RootState) => state.cart.cartList);
   const [cartList, setCartList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -340,7 +340,7 @@ const Checkout = () => {
   });
   const [shipping, setShipping] = useState<ShippingAddress>({
     name: "",
-    email:"",
+    email: "",
     phone: "",
     address: "",
     city: "",
@@ -381,28 +381,28 @@ const Checkout = () => {
     if (cartList.length === 0) handleGetCart();
   }, []);
 
-  const handleGetUserAddress = async() => {
-    try{
-       const res = await getOrderById();
-       console.log(res);
-       if(res.status===200 && user?.id===res?.data?.order?.user){
+  const handleGetUserAddress = async () => {
+    try {
+      const res = await getOrderById();
+      console.log(res);
+      if (res.status === 200 && user?.id === res?.data?.order?.user) {
         setUserAddressData(res.data?.order?.shippingAddress)
-       }
+      }
     }
-    catch(err){
+    catch (err) {
       console.log(err);
     }
   }
-  useEffect(()=>{
+  useEffect(() => {
     handleGetUserAddress()
-  },[]);
- 
+  }, []);
+
   const handleUseOldAddress = () => {
-  if (userAddressData) {
-    setShipping(userAddressData);
-  }
-};
-  
+    if (userAddressData) {
+      setShipping(userAddressData);
+    }
+  };
+
 
   // 🔹 Shipping input handler
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -429,7 +429,7 @@ const Checkout = () => {
           description: res?.data?.message,
         });
 
-        navigate("/ordersuccess");
+        navigate("/ordersuccess", { state: { cartList: cartList } });
       }
     } catch (err: any) {
       toast({
@@ -454,84 +454,84 @@ const Checkout = () => {
 
   return (
     <>
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Checkout</h1>
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Left Section */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Shipping */}
-          <Card>
-            <CardContent className="p-6 space-y-4">
-              <h2 className="text-xl font-semibold">Shipping Address</h2>
-              <Input name="name" placeholder="Full Name" value={shipping.name} onChange={handleChange} />
-               <Input name="email" placeholder="Email" value={shipping.email} onChange={handleChange} />
-              <Input name="phone" placeholder="Phone" value={shipping.phone} onChange={handleChange} />
-              <Input name="address" placeholder="Street Address" value={shipping.address} onChange={handleChange} />
-              <div className="grid grid-cols-2 gap-4">
-                <Input name="city" placeholder="City" value={shipping.city} onChange={handleChange} />
-                <Input name="state" placeholder="State" value={shipping.state} onChange={handleChange} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Input name="postalCode" placeholder="Postal Code" value={shipping.postalCode} onChange={handleChange} />
-                <Input name="country" placeholder="Country" value={shipping.country} onChange={handleChange} />
-              </div>
-            { userAddressData !== null &&  <div className="flex justify-end" onClick={handleUseOldAddress}>
-               <Button>Use Old Address</Button>
-              </div>}
-            </CardContent>
-          </Card>
-
-          {/* Order Items */}
-          <Card>
-            <CardContent className="p-6 space-y-4 max-h-[400px] overflow-y-auto">
-              <h2 className="text-xl font-semibold">Order Items</h2>
-              {cartList.map((item) => (
-                <div key={item._id} className="flex justify-between">
-                  <div>{item.product?.name} × {item.quantity}</div>
-                  <div>
-                    ₹{item?.product?.price}
-                  </div>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left Section */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Shipping */}
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <h2 className="text-xl font-semibold">Shipping Address</h2>
+                <Input name="name" placeholder="Full Name" value={shipping.name} onChange={handleChange} />
+                <Input name="email" placeholder="Email" value={shipping.email} onChange={handleChange} />
+                <Input name="phone" placeholder="Phone" value={shipping.phone} onChange={handleChange} />
+                <Input name="address" placeholder="Street Address" value={shipping.address} onChange={handleChange} />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input name="city" placeholder="City" value={shipping.city} onChange={handleChange} />
+                  <Input name="state" placeholder="State" value={shipping.state} onChange={handleChange} />
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Input name="postalCode" placeholder="Postal Code" value={shipping.postalCode} onChange={handleChange} />
+                  <Input name="country" placeholder="Country" value={shipping.country} onChange={handleChange} />
+                </div>
+                {userAddressData !== null && <div className="flex justify-end" onClick={handleUseOldAddress}>
+                  <Button>Use Old Address</Button>
+                </div>}
+              </CardContent>
+            </Card>
 
-        {/* Right Section - Summary */}
-        <div>
-          <Card className="sticky top-24">
-            <CardContent className="p-6 space-y-4">
-              <h2 className="text-xl font-semibold">Order Summary</h2>
-              <div className="flex justify-between">
-                <span>Subtotal ({cartList.length} items)</span>
-                <span>₹{cartSummary.subtotal}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>{cartSummary.shipping === 0 ? "Free" : `₹${cartSummary.shipping}`}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax</span>
-                <span>₹{cartSummary.tax}</span>
-              </div>
-              <div className="flex justify-between text-green-600">
-                <span>Discount</span>
-                <span>- ₹{cartSummary.totalDiscount}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total</span>
-                <span className="text-yellow-600">₹{cartSummary.totalPrice}</span>
-              </div>
-              <Button className="w-full" size="lg" onClick={handlePlaceOrder} disabled={isLoading}>
-                {isLoading ? "Placing Order..." : "Place Order"}
-                {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-              </Button>
-            </CardContent>
-          </Card>
+            {/* Order Items */}
+            <Card>
+              <CardContent className="p-6 space-y-4 max-h-[400px] overflow-y-auto">
+                <h2 className="text-xl font-semibold">Order Items</h2>
+                {cartList.map((item) => (
+                  <div key={item._id} className="flex justify-between">
+                    <div>{item.product?.name} × {item.quantity}</div>
+                    <div>
+                      ₹{item?.product?.price}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Section - Summary */}
+          <div>
+            <Card className="sticky top-24">
+              <CardContent className="p-6 space-y-4">
+                <h2 className="text-xl font-semibold">Order Summary</h2>
+                <div className="flex justify-between">
+                  <span>Subtotal ({cartList.length} items)</span>
+                  <span>₹{cartSummary.subtotal}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>{cartSummary.shipping === 0 ? "Free" : `₹${cartSummary.shipping}`}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tax</span>
+                  <span>₹{cartSummary.tax}</span>
+                </div>
+                <div className="flex justify-between text-green-600">
+                  <span>Discount</span>
+                  <span>- ₹{cartSummary.totalDiscount}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total</span>
+                  <span className="text-yellow-600">₹{cartSummary.totalPrice}</span>
+                </div>
+                <Button className="w-full" size="lg" onClick={handlePlaceOrder} disabled={isLoading}>
+                  {isLoading ? "Placing Order..." : "Place Order"}
+                  {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };
