@@ -12,7 +12,7 @@ const OrderSuccess: React.FC = () => {
 
   return (
     <>
-      <RatingModal isOpen={isRatingOpen} onOpenChange={setIsRatingOpen} productName="" cartList={cartList} />
+      <RatingModal isOpen={isRatingOpen} onOpenChange={setIsRatingOpen} cartList={cartList} />
       <div className="container mx-auto py-16 text-center">
         <h1 className="text-4xl font-bold text-green-600 mb-4">Thank You!</h1>
         <p className="text-lg mb-6">Your order <span className="font-semibold">{orderId}</span> has been placed successfully.</p>

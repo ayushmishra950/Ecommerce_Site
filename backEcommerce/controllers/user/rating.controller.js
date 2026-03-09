@@ -4,7 +4,7 @@ const Rating = require("../../models/rating.model");
 // ADD RATING
 const addRating = async (req, res) => {
     try {
-
+    console.log(req.body);
         const { shopId, productId, rating, feedback } = req.body;
         const userId = req.user._id; // assume auth middleware
 
