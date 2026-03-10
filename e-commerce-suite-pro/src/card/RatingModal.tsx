@@ -217,7 +217,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star, CheckCircle2 } from "lucide-react";
 import {
   Dialog,
@@ -256,6 +256,7 @@ const RatingModal = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [allRatingList, setAllRatingList] = useState<any>([])
 
   const getRatingText = (val: number) => {
     switch (val) {
@@ -321,13 +322,24 @@ const RatingModal = ({
 
 
   const handleGetRating = async() => {
+    const productIds = cartList?.map((c)=> c?.product?._id);
+    console.log(productIds)
+    if(!productIds || productIds.length===0) return ;
     try{
-        const res = await getRating();
+        const res = await getRating(productIds);
+        console.log(res);
+        if(res.status===200){
+          setAllRatingList(res.data.data)
+        }
     }
     catch(err){
       console.log(err);
     }
   }
+
+  useEffect(()=>{
+    handleGetRating()
+  },[])
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

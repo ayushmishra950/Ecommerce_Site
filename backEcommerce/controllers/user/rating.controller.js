@@ -53,15 +53,38 @@ const addRating = async (req, res) => {
 const getProductRatings = async (req, res) => {
     try {
 
-        const { productId } = req.params;
+   let { productIds } = req.query;
+   console.log(productIds)
 
-        const ratings = await Rating.find({ productId })
-            .populate("userId", "name");
+        if (!productIds) {
+            return res.status(400).json({
+                success:false,
+                message:"productIds required"
+            })
+        }
+
+        // अगर single id आये तो array बना दो
+        if (!Array.isArray(productIds)) {
+            productIds = [productIds];
+        }
+        const userId = req.user?.id;
+
+        // user ne jin products ko rating di hai
+        const ratedProducts = await Rating.find({
+            productId: { $in: productIds },
+            userId: userId
+        }).select("productId");
+
+        const ratedProductIds = ratedProducts.map(r => r.productId.toString());
+
+        // jin products ko rating nahi di
+        const unratedProducts = productIds.filter(
+            id => !ratedProductIds.includes(id)
+        );
 
         res.status(200).json({
             success: true,
-            count: ratings.length,
-            data: ratings
+            data: unratedProducts
         });
 
     } catch (error) {

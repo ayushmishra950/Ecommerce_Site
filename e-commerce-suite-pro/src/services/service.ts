@@ -249,8 +249,8 @@ export const addRating = async (obj: any) => {
 }
 
 
-export const getRating = async (productId: string) => {
-    const res = await api.get(`/api/user/rating/get`, { params: { productId } });
+export const getRating = async (productIds: string[]) => {
+    const res = await api.get(`/api/user/rating/product`, { params: { productIds : productIds } });
     return res;
 }
 
