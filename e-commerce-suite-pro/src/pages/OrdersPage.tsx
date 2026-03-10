@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Search, Filter, Package, Truck, CheckCircle, XCircle, ChevronDown, ChevronUp, MapPin, CreditCard, Calendar } from "lucide-react";
 import { getOrder } from "@/services/service";
 import { useToast } from "@/hooks/use-toast";
+import OrderProductDetailModal, { OrderProduct } from "@/card/OrderProductDetailModal";
 
 type OrderItem = {
   id: string;
@@ -248,6 +249,35 @@ const OrdersPage = () => {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [orderList, setOrderList] = useState([]);
   const [orderListRefresh, setOrderListRefresh] = useState(false);
+
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<OrderProduct | undefined>(undefined);
+
+  const openProductModal = (order: any, item: any) => {
+    const productData: OrderProduct = {
+      id: item.product?._id || item._id,
+      productName: item.product?.name || item.name,
+      brand: item.product?.brand || "Brand",
+      image: item.product?.images?.[0] || item.product?.image || item.image,
+      description: item.product?.description || "High quality product.",
+      price: item.finalPrice || item.price,
+      quantity: item.quantity,
+      orderId: order._id,
+      orderDate: new Date(order.createdAt).toLocaleDateString(),
+      status: order.orderStatus?.toLowerCase() || "placed",
+      paymentMethod: order.paymentMethod,
+      address: order.shippingAddress?.address || "Address",
+      city: order.shippingAddress?.city,
+      zipCode: order.shippingAddress?.postalCode || order.shippingAddress?.zip,
+      deliveryDate: "Expected in 5-7 days",
+      trackingNumber: order.trackingNumber || "N/A",
+      discount: (item.price - item.finalPrice) || 0,
+      shipping: order.shippingCharge || 0,
+      tax: order.tax || 0,
+    };
+    setSelectedProduct(productData);
+    setIsProductModalOpen(true);
+  };
   const filteredAndSortedOrders = useMemo(() => {
     let filtered = orderList;
 
@@ -453,7 +483,8 @@ const OrdersPage = () => {
                       {order?.orderItems?.map((item, index) => (
                         <div
                           key={item._id}
-                          className={`flex items-center gap-4 ${index !== order?.orderItems?.length - 1 ? "pb-4 border-b border-gray-100" : ""
+                          onClick={() => openProductModal(order, item)}
+                          className={`flex items-center gap-4 cursor-pointer hover:bg-gray-50/80 p-2 rounded-xl transition-all ${index !== order?.orderItems?.length - 1 ? "pb-4 border-b border-gray-100" : ""
                             }`}
                         >
                           <div className="relative group/img">
@@ -571,6 +602,13 @@ const OrdersPage = () => {
           </div>
         )}
       </div>
+
+      {/* Product Detail Modal */}
+      <OrderProductDetailModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        data={selectedProduct}
+      />
     </div>
   );
 };

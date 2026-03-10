@@ -76,6 +76,11 @@ export const productStatus = async (obj: any) => {
     return res;
 };
 
+export const getAdminProductById = async (id: string) => {
+    const res = await api.get(`/api/admin/product/${id}`);
+    return res;
+};
+
 export const getAdminData = async (id: string, shopId: string) => {
     const res = await api.get(`/api/admin/auth/getbyid`, { params: { id, shopId } });
     return res;

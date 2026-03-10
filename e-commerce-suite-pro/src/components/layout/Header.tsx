@@ -141,7 +141,7 @@ export const Header = () => {
                     <DropdownMenuItem asChild>
                       <Link to="/orderpage" className="cursor-pointer">
                         <Package className="mr-2 h-4 w-4" />
-                        Orders
+                       My Orders
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

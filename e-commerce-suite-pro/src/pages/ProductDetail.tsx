@@ -29,7 +29,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { products } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
