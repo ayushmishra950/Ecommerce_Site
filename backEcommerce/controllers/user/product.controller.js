@@ -136,5 +136,5 @@ module.exports = {
   getProductById,
   searchProducts,
   getProductsByCategory,
-  getAllCategory
+  getAllCategory,
 };

@@ -24,6 +24,7 @@ import {
     Dialog,
     DialogContent,
     DialogHeader,
+    DialogFooter,
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -132,7 +133,7 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="w-[95vw] sm:w-[90vw] max-h-[95vh] md:max-w-4xl p-0 overflow-hidden bg-zinc-50 dark:bg-zinc-950 border-none rounded-xl sm:rounded-2xl shadow-2xl transition-all">
+            <DialogContent className=" flex flex-col w-[95vw] sm:w-[90vw] max-h-[95vh] md:max-w-4xl p-0 overflow-hidden bg-zinc-50 dark:bg-zinc-950 border-none rounded-xl sm:rounded-2xl shadow-2xl transition-all">
                 <DialogHeader className="p-4 sm:p-6 bg-white dark:bg-zinc-900 border-b">
                     <div className="flex items-center justify-between gap-2 sm:gap-4">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -160,7 +161,7 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
                     </div>
                 </DialogHeader>
 
-                <ScrollArea className="max-h-[95vh] sm:max-h-[80vh] overflow-y-auto">
+                <ScrollArea className="flex-1 overflow-y-auto">
                     <div className="p-4 sm:p-6 space-y-6 sm:space-y-8 pb-100">
                         {/* Status Stepper */}
                         {data.status !== "cancelled" && (
@@ -335,51 +336,47 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
                             </div>
                         </div>
                     </div>
-
-
-
-
-
-
-                    <div className="sticky z-10   sm:p-6 bg-white dark:bg-zinc-900 border-t flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-                        <div className="flex gap-2 shrink-0 py-4">
-                            {data.status !== "cancelled" && data.status !== "delivered" && (
-                                <Button
-                                    variant="destructive"
-                                    className="flex-1 sm:flex-none rounded-xl h-10 px-4  sm:px-5 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white border-none text-xs sm:text-sm font-semibold"
-                                    onClick={handleCancelOrder}
-                                    disabled={isCancelling}
-                                >
-                                    {isCancelling ? "Processing..." : "Cancel Order"}
-                                </Button>
-                            )}
-                            {data.status === "delivered" && (
-                                <Button
-                                    variant="secondary"
-                                    className="flex-1 sm:flex-none rounded-xl h-10 px-4 sm:px-5 flex items-center justify-center gap-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border-none text-xs sm:text-sm font-semibold"
-                                >
-                                    <RotateCcw size={14} className="sm:w-4 sm:h-4" /> Return
-                                </Button>
-                            )}
-                        </div>
-
-                        <div className="flex gap-2 ml-0 sm:ml-auto">
-                            <Button
-                                variant="outline"
-                                className="flex-1 sm:flex-none rounded-xl h-10 px-4 sm:px-5 flex items-center justify-center gap-2 border-zinc-200 dark:border-zinc-800 text-xs sm:text-sm"
-                                onClick={handleDownloadInvoice}
-                            >
-                                <Download size={14} className="sm:w-4 sm:h-4" /> <span className="sm:inline">Invoice</span>
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="flex-1 sm:flex-none rounded-xl h-10 px-4 sm:px-5 flex items-center justify-center gap-2 border-zinc-200 dark:border-zinc-800 text-xs sm:text-sm"
-                            >
-                                <Printer size={14} className="sm:w-4 sm:h-4" /> <span className="sm:inline">Print</span>
-                            </Button>
-                        </div>
-                    </div>
+                   
                 </ScrollArea>
+                <DialogFooter >
+        
+                     <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2">
+  <Button
+    variant="outline"
+    className="m-1"
+    onClick={handleDownloadInvoice}
+  >
+    <Download size={14}/> Invoice
+  </Button>
+
+  <Button
+    variant="outline"
+    className="m-1"
+  >
+    <Printer size={14}/> Print
+  </Button>
+
+  {data.status !== "cancelled" && data.status !== "delivered" && (
+    <Button
+      variant="destructive"
+      className="m-1"
+      onClick={handleCancelOrder}
+      disabled={isCancelling}
+    >
+      {isCancelling ? "Processing..." : "Cancel Order"}
+    </Button>
+  )}
+
+  {data.status === "delivered" && (
+    <Button
+      variant="secondary"
+      className="m-1"
+    >
+      <RotateCcw size={14}/> Return
+    </Button>
+  )}
+</div>
+                </DialogFooter>
 
 
             </DialogContent>

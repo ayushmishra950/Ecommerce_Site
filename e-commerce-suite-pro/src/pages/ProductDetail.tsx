@@ -1,40 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import {
-  ArrowLeft,
-  Heart,
-  Minus,
-  Plus,
-  ShoppingCart,
-  Star,
-  Truck,
-  Shield,
-  RotateCcw,
-  Check,
-  X,
-  Share2,
-  Facebook,
-  Twitter,
-  Copy,
-  Package,
-  Clock,
-  ChevronRight,
-  MessageCircle,
-  ThumbsUp,
-  StarHalf,
-  Zap,
-  Award,
-  TrendingUp
-} from 'lucide-react';
+import { ArrowLeft, Heart, Minus, Plus, ShoppingCart, Star, Truck, Shield, RotateCcw, Check, X, Share2, Facebook, Twitter, Copy, Package, Clock, ChevronRight, MessageCircle, ThumbsUp, StarHalf, Zap, Award, TrendingUp} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { getProductById } from "@/services/service";
+import { getProductById, getProductByCategoryId } from "@/services/service";
 import { addToCart, incrementQuantity, decrementQuantity } from '@/redux-toolkit/slice/cartSlice';
 import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
+import {calculateDiscount} from "@/services/allFunction";
 
 // Dummy Reviews Data
 const dummyReviews = [
@@ -130,6 +105,7 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState<any>([])
   const dispatch = useAppDispatch();
   const items = useAppSelector((state) => state?.cart?.cartList);
 
@@ -158,7 +134,16 @@ const ProductDetail = () => {
     try {
       const res = await getProductById(id);
       if (res.status === 200) {
-        setProduct(res?.data?.data);
+         setProduct(res?.data?.data);
+        const id = res.data.data?.category?._id;
+        if(!id) return;
+        const productData = await getProductByCategoryId(id);
+        console.log(productData);
+        if(productData.status===200){
+          setRelatedProducts(productData?.data?.data)
+        }
+        
+       
       }
     } catch (err) {
       console.log(err);
@@ -408,34 +393,7 @@ const ProductDetail = () => {
                 </div>
               ))}
 
-              {/* Quantity Selector */}
-              <div className="space-y-3">
-                <p className="font-semibold text-gray-900">Quantity</p>
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => dispatch(decrementQuantity(product?._id))}
-                    disabled={currentQuantity <= 0}
-                    className="h-12 w-12"
-                  >
-                    <Minus className="h-5 w-5" />
-                  </Button>
-                  <span className="w-16 text-center text-2xl font-bold text-gray-900">
-                    {currentQuantity}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => dispatch(incrementQuantity(product?._id))}
-                    disabled={!product?.stock || currentQuantity >= product?.stock}
-                    className="h-12 w-12"
-                  >
-                    <Plus className="h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-
+            
               {/* Action Buttons */}
               <div className="flex gap-4 pt-2">
                 <Button
@@ -676,21 +634,21 @@ const ProductDetail = () => {
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {relatedProducts.map((relatedProduct) => (
+            {relatedProducts.filter((p)=> p?._id !== id).map((relatedProduct) => (
               <div
-                key={relatedProduct.id}
-                onClick={() => navigate(`/product/${relatedProduct.id}`)}
+                key={relatedProduct._id}
+                onClick={() => navigate(`/product/${relatedProduct._id}`)}
                 className="group cursor-pointer bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all transform hover:scale-105"
               >
                 <div className="aspect-square overflow-hidden bg-gray-50">
                   <img
-                    src={relatedProduct.image}
-                    alt={relatedProduct.name}
+                    src={relatedProduct?.images?.[0]}
+                    alt={relatedProduct?.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                   />
                 </div>
                 <div className="p-4 space-y-2">
-                  <h3 className="font-semibold text-gray-900 truncate">{relatedProduct.name}</h3>
+                  <h3 className="font-semibold text-gray-900 truncate">{relatedProduct?.name}</h3>
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
                       <Star
@@ -705,8 +663,8 @@ const ProductDetail = () => {
                     ))}
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-bold text-gray-900">₹{relatedProduct.price.toLocaleString()}</span>
-                    <span className="text-sm text-gray-400 line-through">₹{relatedProduct.originalPrice.toLocaleString()}</span>
+                    <span className="text-lg font-bold text-gray-900">₹{relatedProduct?.price - calculateDiscount(relatedProduct)}</span>
+                    <span className="text-sm text-gray-400 line-through">₹{relatedProduct?.price?.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
