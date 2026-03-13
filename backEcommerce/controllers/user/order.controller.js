@@ -310,14 +310,14 @@ const getMyOrders = async (req, res) => {
     const orders = await Order.find({ user: req.user.id })
       .populate("orderItems.product")
       .sort({ createdAt: -1 });
-
+   console.log(orders)
     const updatedOrders = await Promise.all(
       orders.map(async (order) => {
         let shopTax = 0;
 
         if (order.orderItems.length > 0) {
-          const shopId = order.orderItems[0].product.shopId;
-
+          const shopId = order?.orderItems[0]?.product?.shopId;
+          
           const shop = await Shop.findById(shopId).select("taxPercentage");
 
           shopTax = shop?.taxPercentage || 0;
@@ -329,6 +329,7 @@ const getMyOrders = async (req, res) => {
         };
       })
     );
+    console.log(updatedOrders)
 
     res.status(200).json({
       success: true,

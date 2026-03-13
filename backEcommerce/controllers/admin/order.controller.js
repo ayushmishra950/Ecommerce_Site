@@ -109,9 +109,9 @@ const getOrderById = async (req, res) => {
  */
 const updateOrderStatus = async (req, res) => {
   try {
-    const { userId, orderStatus, paymentStatus } = req.body;
+    const { orderId, status, paymentStatus } = req.body;
 
-    const roleCheck = await checkAdminRole(userId);
+    const roleCheck = await checkAdminRole(req.user.id);
     if (!roleCheck.allowed) {
       return res.status(403).json({
         success: false,
@@ -119,7 +119,7 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -127,7 +127,7 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    if (orderStatus) order.orderStatus = orderStatus;
+    if (status) order.orderStatus = status;
     if (paymentStatus) order.paymentStatus = paymentStatus;
 
     await order.save();

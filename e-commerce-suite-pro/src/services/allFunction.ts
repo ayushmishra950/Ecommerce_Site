@@ -50,5 +50,31 @@ export const getStatusVariant = (
 };
 
 
+
+export const getStatusColorFromOrder = (status: string) => {
+  const s = status.toLowerCase();
+
+  switch (s) {
+    case "placed":
+      return "bg-blue-100 text-blue-700";
+
+    case "confirmed":
+      return "bg-purple-100 text-purple-700";
+
+    case "shipped":
+      return "bg-orange-100 text-orange-700";
+
+    case "delivered":
+      return "bg-green-100 text-green-700";
+
+    case "cancelled":
+      return "bg-red-100 text-red-700";
+
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
+
 export const orderStages = ["placed", "confirmed", "shipped", "delivered", "cancelled"];
 // export const stages = [ "placed", "pending_payment", "payment_failed", "confirmed", "processing", "packed", "shipped", "out_for_delivery", "delivered", "cancelled", "return_requested", "returned", "refunded"];

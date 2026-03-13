@@ -98,6 +98,11 @@ export const getAllOrder = async () => {
     return res;
 }
 
+export const updateOrderStatus = async (obj:any) => {
+    const res = await api.put("/api/admin/order/status", obj);
+    return res;
+}
+
 
 export const getAllCustomer = async () => {
     const res = await api.get("/api/admin/user/get");

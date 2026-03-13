@@ -166,10 +166,10 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
   };
 
   useEffect(() => {
-    if (categoryList.length === 0 || categoryListRefresh) {
+    if (categoryList?.length === 0 || categoryListRefresh) {
       handleGetCategory();
     }
-  }, [categoryListRefresh, categoryList.length]);
+  }, [categoryListRefresh, categoryList?.length]);
 
   return (
     <>
@@ -206,7 +206,7 @@ const AddProductDialog = ({ open, onOpenChange, initialData, setProductListRefre
                   </SelectTrigger>
                  <SelectContent className="max-h-[250px]">
                   {
-                    categoryList.length >0 && (
+                    categoryList?.length >0 && (
                       categoryList?.map((v)=> (
                         <SelectItem value={v?._id} className="text-xs cursor-pointer">{v?.name}</SelectItem>
                       ))

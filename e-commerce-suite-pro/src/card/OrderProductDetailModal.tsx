@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from "react";
@@ -97,6 +98,7 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
 
     const statusSteps = [
         { label: "Placed", icon: ShoppingBag, color: "text-blue-500", bgColor: "bg-blue-500" },
+         { label: "confirmed", icon: ShoppingBag, color: "text-blue-500", bgColor: "bg-blue-500" },
         { label: "Shipped", icon: Package, color: "text-orange-500", bgColor: "bg-orange-500" },
         { label: "Out for Delivery", icon: Truck, color: "text-purple-500", bgColor: "bg-purple-500" },
         { label: "Delivered", icon: CheckCircle2, color: "text-green-500", bgColor: "bg-green-500" },
@@ -361,7 +363,7 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
       variant="destructive"
       className="m-1"
       onClick={handleCancelOrder}
-      disabled={isCancelling}
+      disabled={isCancelling || data.status !== "placed" || data.status!=="confirmed"}
     >
       {isCancelling ? "Processing..." : "Cancel Order"}
     </Button>

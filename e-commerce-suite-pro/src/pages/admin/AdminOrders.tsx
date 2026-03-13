@@ -1,27 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Search, Filter, Eye, MoreHorizontal } from 'lucide-react';
+import { Search, Filter, Eye, MoreHorizontal, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {getAllOrder} from "@/services/service";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu';
+import {getAllOrder, updateOrderStatus} from "@/services/service";
 import {formatDate} from "@/services/allFunction";
-import {Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader} from "@/components/ui/dialog";
-import {orderStages} from "@/services/allFunction";
+import {Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter} from "@/components/ui/dialog";
+import {orderStages, getStatusColorFromOrder} from "@/services/allFunction";
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 
 const orders = [
@@ -33,22 +23,16 @@ const orders = [
   { id: '#ORD-006', customer: 'Emily Davis', email: 'emily@example.com', items: 2, total: 259.99, status: 'cancelled', date: '2024-01-15' },
 ];
 
-const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
-  switch (status) {
-    case 'delivered': return 'default';
-    case 'processing': return 'secondary';
-    case 'pending': return 'outline';
-    case 'shipped': return 'secondary';
-    case 'cancelled': return 'destructive';
-    default: return 'outline';
-  }
-};
 
 const AdminOrders = () => {
+  const {toast} = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [orderList, setOrderList] = useState([]);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [orderId, setOrderId] = useState("");
 
   const filteredOrders = orderList.filter(order => {
     const matchesSearch = order._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -75,8 +59,28 @@ const AdminOrders = () => {
     handleGetOrder()
   },[])
 
-  console.log(filteredOrders)
+  const handleUpdateOrderStatus = async()=>{
+    let obj = {status: currentStatus, orderId:orderId}
+    try{
+      setIsLoading(true);
+      const res = await updateOrderStatus(obj);
+      console.log(res);
+      if(res.status===200){
+        handleGetOrder();
+        toast({title:"Order Status Updated.", description:"Order status Updated."})
+      }
+    }
+    catch(err){
+      console.log(err);
+      toast({title:"Update Order Status Failed.", description:err?.response?.data?.message|| err?.message, variant : "destructive"})
 
+    }
+    finally{
+      setIsLoading(false);
+      setStatusDialogOpen(false);
+      setCurrentStatus("");
+    }
+  }
   return (
     <>
     <div className="space-y-6">
@@ -135,7 +139,7 @@ const AdminOrders = () => {
                     <td className="py-4 px-6 text-sm text-muted-foreground">{order.orderItems?.length} items</td>
                     <td className="py-4 px-6 text-sm font-medium text-foreground">${order.subtotal}</td>
                     <td className="py-4 px-6">
-                      <Badge variant={getStatusVariant(order.orderStatus)}>
+                      <Badge className={getStatusColorFromOrder(order.orderStatus)}>
                         {order.orderStatus}
                       </Badge>
                     </td>
@@ -148,12 +152,12 @@ const AdminOrders = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem className='cursor-pointer'>
                             <Eye className="h-4 w-4 mr-2" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={()=>{setStatusDialogOpen(true)}}>Update Status</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">Cancel Order</DropdownMenuItem>
+                          <DropdownMenuItem onClick={()=>{setOrderId(order?._id);setCurrentStatus(order?.orderStatus);setStatusDialogOpen(true)}} className='cursor-pointer'>Update Status</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive cursor-pointer">Cancel Order</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -165,27 +169,51 @@ const AdminOrders = () => {
         </CardContent>
       </Card>
     </div>
-       <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen} >
-       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Status Update</DialogTitle>
-          <DialogDescription>Status Update</DialogDescription>
-        </DialogHeader>
-        <Label>Status Update</Label>
-        <Select>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          {
-            orderStages?.map((v)=>(
-              <>
-               <SelectItem value={v}>{v}</SelectItem>
-              </>
-            ))
-          }
-        </Select>
-       </DialogContent>
-      </Dialog>
+      <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+  <DialogContent>
+    
+    <DialogHeader>
+      <DialogTitle>Update Order Status</DialogTitle>
+      <DialogDescription>
+        Update the current status of this order to reflect its latest progress. 
+        Select the appropriate stage from the list below and confirm to save the changes.
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="space-y-2">
+      <Label>Order Status</Label>
+
+      <Select
+        value={currentStatus}
+        onValueChange={(value) => setCurrentStatus(value)}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select order status" />
+        </SelectTrigger>
+
+        <SelectContent>
+          {orderStages?.map((stage) => (
+            <SelectItem key={stage} value={stage}>
+              {stage}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
+    <DialogFooter>
+      <Button type="button" variant="outline" onClick={() => setStatusDialogOpen(false)}>
+        Cancel
+      </Button>
+
+      <Button type="button" variant="default" onClick={handleUpdateOrderStatus} disabled={isLoading}>
+        {isLoading ? "Updating..." : "Update Status"}
+        {isLoading && <Loader2 className='animate-spin' />}
+      </Button>
+    </DialogFooter>
+
+  </DialogContent>
+</Dialog>
     </>
   );
 };

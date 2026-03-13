@@ -101,7 +101,7 @@ router.get("/:id", getOrderById);
  *       403:
  *         description: Access denied
  */
-router.put("/:id", updateOrderStatus);
+router.put("/status", updateOrderStatus);
 
 /**
  * @swagger
