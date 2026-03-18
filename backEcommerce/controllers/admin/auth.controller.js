@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const Shop = require("../../models/shop.model");
 const User = require("../../models/user.model");
 const {generateAccessToken, generateRefreshToken} = require("../../utils/jwt.util");
+const ShopBlockedUser = require("../../models/blockUser.model");
 
 
 // JWT secret

@@ -2,6 +2,7 @@ const Wishlist = require("../../models/wishlist.model");
 const Product = require("../../models/product.model");
 const User = require("../../models/user.model");
 const Cart = require("../../models/cart.model");
+const ShopBlockedUser = require("../../models/blockUser.model");
 
 /**
  * @desc    Get logged-in user's wishlist
@@ -60,6 +61,10 @@ const toggleWishlist = async (req, res) => {
         message: "Product not found",
       });
     }
+
+     const isBlocked = await ShopBlockedUser.findOne({user:userId, shop:product?.shopId, isBlocked:true});
+        if(isBlocked) return res.status(403).json({message:"you are blocked. please contact to admin."})
+    
 
     // 3️⃣ Check existing wishlist item
     const existingItem = await Wishlist.findOne({
@@ -152,6 +157,11 @@ const moveToCart = async (req, res) => {
     if (!wishlistItem) {
       return res.status(404).json({ message: "Product not found in wishlist" });
     }
+    const product = await Product.findOne({_id:productId});
+
+     const isBlocked = await ShopBlockedUser.findOne({user:userId, shop:product?.shopId, isBlocked:true});
+        if(isBlocked) return res.status(403).json({message:"you are blocked. please contact to admin."})
+    
 
     // 1️⃣ Find Cart of User
     let cart = await Cart.findOne({ user: userId });
@@ -236,6 +246,11 @@ const allProductMoveToCart = async (req, res) => {
     for (let wishItem of wishListProducts) {
 
       const productId = wishItem.product;
+       const product = await Product.findOne({_id:productId});
+
+     const isBlocked = await ShopBlockedUser.findOne({user:userId, shop:product?.shopId, isBlocked:true});
+        if(isBlocked) return res.status(403).json({message:"you are blocked. please contact to admin."})
+    
       const price = wishItem.price; // assuming wishlist me price stored hai
 
       const existingItemIndex = cart.items.findIndex(

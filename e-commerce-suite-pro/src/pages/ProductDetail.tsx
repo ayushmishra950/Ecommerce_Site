@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Minus, Plus, ShoppingCart, Star, Truck, Shield, RotateCcw, Check, X, Share2, Facebook, Twitter, Copy, Package, Clock, ChevronRight, MessageCircle, ThumbsUp, StarHalf, Zap, Award, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Heart, Minus, Plus,Send, ShoppingCart, Star, Truck, Shield, RotateCcw, Check, X, Share2, Facebook, Twitter, Copy, Package, Clock, ChevronRight, MessageCircle, ThumbsUp, StarHalf, Zap, Award, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { getProductById, getProductByCategoryId, addCart, addRatingHelpful } from "@/services/service";
+import { getProductById, getProductByCategoryId, addCart, addRatingHelpful, addCommentReply } from "@/services/service";
 import { addToCart, incrementQuantity, decrementQuantity } from '@/redux-toolkit/slice/cartSlice';
 import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
 import { calculateDiscount } from "@/services/allFunction";
+import { useAuth } from '@/context/AuthContext';
 
 // Dummy Reviews Data
 const dummyReviews = [
@@ -58,6 +59,7 @@ const dummyReviews = [
 const ProductDetail = () => {
   const { id } = useParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -70,6 +72,9 @@ const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState<any>([]);
+  const [showReply, setShowReply] = useState(false);
+  const [replyMessage, setReplyMessage] = useState("");
+  const [showReplyMessage, setShowReplyMessage] = useState(false);
   const dispatch = useAppDispatch();
   const items = useAppSelector((state) => state?.cart?.cartList);
 
@@ -119,17 +124,34 @@ const ProductDetail = () => {
     handleGetProduct();
   }, [id]);
 
-  const handleAddHelpful = async(id) =>{
-    try{
-       const res = await addRatingHelpful(id);
-       if(res.status===200){
-        toast({title:"Helpful Updated.", description:res.data.message});
+  const handleAddHelpful = async (id) => {
+    try {
+      const res = await addRatingHelpful(id);
+      if (res.status === 200) {
+        toast({ title: "Helpful Updated.", description: res.data.message });
         handleGetProduct();
-       }
+      }
     }
-    catch(err){
+    catch (err) {
       console.log(err);
-      toast({title:"Error Helpful.", description:err?.response?.data?.message || err?.message, variant:"destructive"})
+      toast({ title: "Error Helpful.", description: err?.response?.data?.message || err?.message, variant: "destructive" })
+    }
+  }
+
+   const handleAddCommentReply = async (id) => {
+    let obj = {ratingId:id, comment: replyMessage}
+    try {
+      const res = await addCommentReply(obj);
+      if (res.status === 200) {
+        toast({ title: "reply Successfully.", description: res.data.message });
+        handleGetProduct();
+        setReplyMessage("");
+        setShowReply(false);
+      }
+    }
+    catch (err) {
+      console.log(err);
+      toast({ title: "Error Reply Comment.", description: err?.response?.data?.message || err?.message, variant: "destructive" })
     }
   }
 
@@ -172,7 +194,7 @@ const ProductDetail = () => {
   const currentItem = items.find((i) => i?._id === product?._id);
   const currentQuantity = currentItem?.quantity || 0;
 
-const averageRating = product?.rating?.length > 0 ? Number((product.rating.reduce((acc, r) => acc + r.rating, 0) / product.rating.length)) : 0; 
+  const averageRating = product?.rating?.length > 0 ? Number((product.rating.reduce((acc, r) => acc + r.rating, 0) / product.rating.length)) : 0;
   //  const ratingDistribution = [5, 4, 3, 2, 1].map(rating => ({
   //   rating,
   //   count: dummyReviews.filter(r => r.rating === rating).length,
@@ -181,18 +203,18 @@ const averageRating = product?.rating?.length > 0 ? Number((product.rating.reduc
 
   const ratings = product?.rating || [];
 
-const ratingDistribution = [5,4,3,2,1].map((star) => {
-  const count = ratings.filter(r => r.rating === star).length;
+  const ratingDistribution = [5, 4, 3, 2, 1].map((star) => {
+    const count = ratings.filter(r => r.rating === star).length;
 
-  const percentage =
-    ratings.length > 0 ? (count / ratings.length) * 100 : 0;
+    const percentage =
+      ratings.length > 0 ? (count / ratings.length) * 100 : 0;
 
-  return {
-    rating: star,
-    count,
-    percentage
-  };
-});
+    return {
+      rating: star,
+      count,
+      percentage
+    };
+  });
 
   if (!product) {
     return (
@@ -361,7 +383,7 @@ const ratingDistribution = [5,4,3,2,1].map((star) => {
                   ))}
                 </div>
                 <span className="text-lg font-semibold text-gray-900">
-                  {averageRating?averageRating.toFixed(1) :0 }
+                  {averageRating ? averageRating.toFixed(1) : 0}
                 </span>
 
                 <span className="text-gray-600">
@@ -542,7 +564,7 @@ const ratingDistribution = [5,4,3,2,1].map((star) => {
               {/* Rating Summary */}
               <div className="grid md:grid-cols-2 gap-8 pb-8 border-b border-gray-200">
                 <div className="text-center space-y-4">
-                  <div className="text-6xl font-bold text-gray-900">{averageRating? averageRating.toFixed(1) : 0 }</div>
+                  <div className="text-6xl font-bold text-gray-900">{averageRating ? averageRating.toFixed(1) : 0}</div>
                   <div className="flex items-center justify-center gap-1">
                     {[...Array(5)].map((_, i) => (
                       <Star
@@ -617,14 +639,51 @@ const ratingDistribution = [5,4,3,2,1].map((star) => {
                     <h5 className="font-semibold text-gray-900 mb-2">{review.title}</h5>
                     <p className="text-gray-700 leading-relaxed mb-4">{review.feedback}</p>
                     <div className="flex items-center gap-4 text-sm">
-                      <button onClick={()=>{handleAddHelpful(review?._id)}} className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors">
-                        <ThumbsUp className="w-4 h-4" />
-                        Helpful ({review.helpful?.length > 0 && review?.helpful?.length})
+                      <button onClick={() => { handleAddHelpful(review?._id) }} className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors">
+                        <ThumbsUp className="w-4 h-4" fill={review?.helpful?.find((h) => h === user?.id) ? "green" : "none"} stroke={review?.helpful?.find((h) => h === user?.id) ? "green" : "currentColor"}/>
+                         Helpful ({review.helpful?.length > 0 && review?.helpful?.length})
                       </button>
-                      <button className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors">
+                      {/* <button className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors">
                         <MessageCircle className="w-4 h-4" />
                         Reply
-                      </button>
+                      </button> */}
+
+                      <div>
+      {/* Reply Button */}
+      <button
+        
+        className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
+      >
+        <MessageCircle className="w-4 h-4" onClick={() => setShowReply(!showReply)} />
+       <span onClick={()=>{setShowReplyMessage(!showReplyMessage)}} >Reply({review?.replyComment?.length})</span>
+      </button>
+      {/* Input + Send */}
+      {showReply && (
+        <div className="mt-2 flex items-center gap-2 max-h-[80px] overflow-y-auto">
+          <input
+            type="text"
+            value={replyMessage}
+            onChange={(e) => setReplyMessage(e.target.value)}
+            placeholder="Write a reply..."
+            className="border px-2 py-1 rounded text-sm w-48 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <button
+            className="p-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+            onClick={() => { handleAddCommentReply(review?._id) }}
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {showReplyMessage && <div className="mt-2 space-y-1">
+  {review?.replyComment?.map((r, i) => (
+    <div key={i} className="text-sm text-gray-700 bg-gray-100 px-2 py-1 rounded">
+      {r?.comment}
+    </div>
+  ))}
+</div>}
+    </div>
                     </div>
                   </div>
                 ))}
@@ -663,20 +722,21 @@ const ratingDistribution = [5,4,3,2,1].map((star) => {
                   <div className="flex items-center gap-1">
 
                     {[...Array(5)].map((_, i) => {
-                      return(
-                      <Star
-                        key={i}
-                        className={cn(
-                          "w-3 h-3",
-                          i < Math.floor(
-                            relatedProduct?.rating?.reduce((acc, r) => acc + r.rating, 0) /
-                            (relatedProduct?.rating?.length || 1)
-                          )
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        )}
-                      />
-                    )})}
+                      return (
+                        <Star
+                          key={i}
+                          className={cn(
+                            "w-3 h-3",
+                            i < Math.floor(
+                              relatedProduct?.rating?.reduce((acc, r) => acc + r.rating, 0) /
+                              (relatedProduct?.rating?.length || 1)
+                            )
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
+                          )}
+                        />
+                      )
+                    })}
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-lg font-bold text-gray-900">₹{relatedProduct?.price - calculateDiscount(relatedProduct)}</span>

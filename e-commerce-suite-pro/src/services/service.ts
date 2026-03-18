@@ -307,4 +307,11 @@ export const addRatingHelpful = async (id: string) => {
 
 
 
+export const addCommentReply = async (obj:any) => {
+    const res = await api.post(`/api/user/rating/comment/reply`, obj);
+    return res;
+}
+
+
+
 

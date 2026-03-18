@@ -12,7 +12,7 @@ import { decrementQuantity, incrementQuantity, removeFromCart } from '@/redux-to
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { getCart, removeCart, clearCart, updateCart } from "@/services/service";
+import { getCart, removeCart, clearCart, updateCart, addAndRemoveProductWishList } from "@/services/service";
 import { calculateDiscount } from "@/services/allFunction";
 
 // Recommended Products Dummy Data
@@ -335,7 +335,7 @@ const Cart = () => {
                         </div>
 
                         {/* Save for Later */}
-                        <div className="flex items-center gap-4 mt-4">
+                        {/* <div className="flex items-center gap-4 mt-4">
                           <button
                             onClick={() => saveForLater(item)}
                             className="text-sm text-yellow-600 hover:text-yellow-700 font-medium flex items-center gap-1"
@@ -343,7 +343,7 @@ const Cart = () => {
                             <Heart className="w-4 h-4" />
                             Save for Later
                           </button>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </div>

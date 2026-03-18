@@ -3,6 +3,8 @@ import { Search, Filter, Package, Truck, CheckCircle, XCircle, ChevronDown, Chev
 import { getOrder } from "@/services/service";
 import { useToast } from "@/hooks/use-toast";
 import OrderProductDetailModal, { OrderProduct } from "@/card/OrderProductDetailModal";
+import {getStatusColorFromOrder} from "@/services/allFunction";
+import { Badge } from "@/components/ui/badge";
 
 type OrderItem = {
   id: string;
@@ -453,7 +455,7 @@ const OrdersPage = () => {
                           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border ${statusConfig?.color}`}>
                             <div className={`w-2 h-2 rounded-full ${statusConfig?.dotColor} animate-pulse`} />
                             {/* <StatusIcon className="w-4 h-4" /> */}
-                            <span>{order?.orderStatus}</span>
+                            <span><Badge className={getStatusColorFromOrder(order?.orderStatus)}>{order?.orderStatus}</Badge></span>
                           </div>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600">

@@ -41,7 +41,7 @@ const Checkout = () => {
   });
   const [shipping, setShipping] = useState<ShippingAddress>({
     name: "",
-    email: "",
+    email: user?.email,
     phone: "",
     address: "",
     city: "",
@@ -100,7 +100,7 @@ const Checkout = () => {
 
   const handleUseOldAddress = () => {
     if (userAddressData) {
-      setShipping(userAddressData);
+      setShipping({...userAddressData, email:user?.email});
     }
   };
   console.log(userAddressData, shipping)
@@ -165,7 +165,7 @@ const Checkout = () => {
               <CardContent className="p-6 space-y-4">
                 <h2 className="text-xl font-semibold">Shipping Address</h2>
                 <Input name="name" placeholder="Full Name" value={shipping.name} onChange={handleChange} />
-                <Input name="email" placeholder="Email" value={shipping.email} onChange={handleChange} />
+                <Input name="email" disabled placeholder="Email" value={shipping.email} onChange={handleChange} />
                 <Input name="phone" placeholder="Phone" value={shipping.phone} onChange={handleChange} />
                 <Input name="address" placeholder="Street Address" value={shipping.address} onChange={handleChange} />
                 <div className="grid grid-cols-2 gap-4">

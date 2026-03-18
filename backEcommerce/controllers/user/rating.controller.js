@@ -1,5 +1,6 @@
 const Rating = require("../../models/rating.model");
 const Product = require("../../models/product.model");
+const ShopBlockedUser = require("../../models/blockUser.model");
 
 
 // ADD RATING
@@ -14,6 +15,13 @@ const addRating = async (req, res) => {
         for (const item of ratings) {
 
             const { productId, rating, feedback, title } = item;
+
+            const product = await Product.findById(productId);
+            if (!product) return res.status(404).json({ success: false, message: "Product not found" });
+
+            const isBlocked = await ShopBlockedUser.findOne({ user: userId, shop: product?.shopId, isBlocked: true });
+            if (isBlocked) return res.status(403).json({ message: "you are blocked. please contact to admin." })
+
 
             const existingRating = await Rating.findOne({
                 userId,
@@ -175,8 +183,15 @@ const updateRating = async (req, res) => {
             productId: obj.productId,
             rating: obj.rating,
             feedback: obj.feedback,
-            title:obj.title
+            title: obj.title
         }
+
+        const product = await Product.findById(obj?.productId);
+        if (!product) return res.status(404).json({ success: false, message: "Product not found" });
+
+        const isBlocked = await ShopBlockedUser.findOne({ user: userId, shop: product?.shopId, isBlocked: true });
+        if (isBlocked) return res.status(403).json({ message: "you are blocked. please contact to admin." })
+
 
         const updatedRating = await Rating.findByIdAndUpdate(
             id,
@@ -218,6 +233,7 @@ const deleteRating = async (req, res) => {
 
         if (rating) {
             const product = await Product.findById(rating.productId);
+
             if (product) {
                 // Remove the rating id from product's rating array
                 product.rating.pull(rating._id);  // pull mutates the array in place
@@ -248,85 +264,84 @@ const deleteRating = async (req, res) => {
 
 
 const addHelpful = async (req, res) => {
-  try {
-    const { ratingId } = req.params;
-    const userId = req.user.id;
+    try {
+        const { ratingId } = req.params;
+        const userId = req.user.id;
 
-    const rating = await Rating.findById(ratingId);
+        const rating = await Rating.findById(ratingId);
 
-    if (!rating) {
-      return res.status(404).json({ message: "Rating not found" });
+        if (!rating) {
+            return res.status(404).json({ message: "Rating not found" });
+        }
+
+        // check already marked helpful or not
+        const alreadyHelpful = rating.helpful.includes(userId);
+
+        if (alreadyHelpful) {
+            rating.helpful.pull(userId); // remove
+        } else {
+            rating.helpful.push(userId); // add
+        }
+
+        await rating.save();
+
+        res.status(200).json({
+            success: true,
+            message: alreadyHelpful
+                ? "Helpful removed"
+                : "Marked as helpful",
+            helpfulCount: rating.helpful.length
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
-
-    // check already marked helpful or not
-    const alreadyHelpful = rating.helpful.includes(userId);
-
-    if (alreadyHelpful) {
-      rating.helpful.pull(userId); // remove
-    } else {
-      rating.helpful.push(userId); // add
-    }
-
-    await rating.save();
-
-    res.status(200).json({
-      success: true,
-      message: alreadyHelpful
-        ? "Helpful removed"
-        : "Marked as helpful",
-      helpfulCount: rating.helpful.length
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
 };
 
 const addReplyComment = async (req, res) => {
-  try {
-    const { ratingId } = req.params;
-    const { comment } = req.body;
-    const userId = req.user.id;
+    try {
+        const { ratingId, comment } = req.body;
+        const userId = req.user.id;
 
-    if (!comment) {
-      return res.status(400).json({
-        success: false,
-        message: "Comment is required"
-      });
+        if (!comment) {
+            return res.status(400).json({
+                success: false,
+                message: "Comment is required"
+            });
+        }
+
+        const rating = await Rating.findById(ratingId);
+
+        if (!rating) {
+            return res.status(404).json({
+                success: false,
+                message: "Rating not found"
+            });
+        }
+
+        // push reply
+        rating.replyComment.push({
+            user: userId,
+            comment: comment
+        });
+
+        await rating.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Reply added successfully",
+            replies: rating.replyComment
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
-
-    const rating = await Rating.findById(ratingId);
-
-    if (!rating) {
-      return res.status(404).json({
-        success: false,
-        message: "Rating not found"
-      });
-    }
-
-    // push reply
-    rating.replyComment.push({
-      user: userId,
-      comment: comment
-    });
-
-    await rating.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Reply added successfully",
-      replies: rating.replyComment
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
 };
 
 module.exports = {

@@ -34,7 +34,10 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import {getStatusColorFromOrder} from "@/services/allFunction";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import {addCart} from "@/services/service";
 
 export interface OrderProduct {
     id: string;
@@ -91,8 +94,10 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
     onClose,
     data = dummyData
 }) => {
+    const {user} = useAuth();
+    const {toast} = useToast();
     const [isCancelling, setIsCancelling] = useState(false);
-
+  
     const subtotal = data.price * data.quantity;
     const total = subtotal - data.discount + data.shipping + data.tax;
 
@@ -114,12 +119,12 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
         setIsCancelling(true);
         // Mock API call
         await new Promise(resolve => setTimeout(resolve, 1500));
-        toast.success("Order cancellation request submitted successfully.");
+        // toast.success("Order cancellation request submitted successfully.");
         setIsCancelling(false);
     };
 
     const handleDownloadInvoice = () => {
-        toast.info("Preparing your invoice for download...");
+        // toast.info("Preparing your invoice for download...");
         // Mock download
     };
 
@@ -132,6 +137,27 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
             default: return <Badge variant="outline">{status}</Badge>;
         }
     };
+
+
+    
+      const handleAddCart = async (product) => {
+        console.log(product)
+        let quantity = 1;
+        try {
+          const res = await addCart(product?.id, quantity);
+          console.log(res)
+          if (res.status === 201) {
+            toast({ title: "Add Item To Cart.", description: res?.data?.message })
+            // dispatch(addToCart(product))
+    
+          }
+        }
+        catch (err) {
+          console.log(err);
+          toast({ title: "Error Add Cart.", description: err?.response?.data?.message || err?.message, variant: "destructive" })
+        }
+      }
+
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -153,13 +179,13 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
                         </div>
                         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                             <div className="hidden xs:block">
-                                {getStatusBadge(data.status)}
+                                <Badge className={getStatusColorFromOrder(data.status)} >{data?.status}</Badge>
                             </div>
 
                         </div>
                     </div>
                     <div className="xs:hidden mt-2">
-                        {getStatusBadge(data.status)}
+                        <Badge className={getStatusColorFromOrder(data?.status)} >{data?.status}</Badge>
                     </div>
                 </DialogHeader>
 
@@ -251,7 +277,7 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
                                 </div>
 
                                 <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 pt-2 sm:pt-4">
-                                    <Button className="flex-1 min-w-[120px] bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-black rounded-xl h-10 sm:h-11 text-xs sm:text-sm">
+                                    <Button onClick={()=>{handleAddCart(data)}} className="flex-1 min-w-[120px] bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-black rounded-xl h-10 sm:h-11 text-xs sm:text-sm">
                                         Buy Again
                                     </Button>
                                     <Button variant="outline" className="flex-1 min-w-[120px] border-zinc-200 dark:border-zinc-800 rounded-xl h-10 sm:h-11 flex items-center gap-2 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-xs sm:text-sm">
@@ -363,7 +389,8 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
       variant="destructive"
       className="m-1"
       onClick={handleCancelOrder}
-      disabled={isCancelling || data.status !== "placed" || data.status!=="confirmed"}
+      disabled={isCancelling || data.status !== "placed"}
+      
     >
       {isCancelling ? "Processing..." : "Cancel Order"}
     </Button>

@@ -76,5 +76,6 @@ export const getStatusColorFromOrder = (status: string) => {
 };
 
 
+
 export const orderStages = ["placed", "confirmed", "shipped", "delivered", "cancelled"];
 // export const stages = [ "placed", "pending_payment", "payment_failed", "confirmed", "processing", "packed", "shipped", "out_for_delivery", "delivered", "cancelled", "return_requested", "returned", "refunded"];
