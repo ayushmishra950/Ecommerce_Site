@@ -25,15 +25,38 @@ const ratingSchema = new mongoose.Schema(
             min: 1,
             max: 5
         },
-        title:{
-        type:String,
-        trim:true
+        title: {
+            type: String,
+            trim: true
         },
 
         feedback: {
             type: String,
             trim: true
-        }
+        },
+        helpful: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User"
+            }
+        ],
+
+        replyComment: [
+            {
+                user: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "User"
+                },
+                comment: {
+                    type: String,
+                    required: true
+                },
+                createdAt: {
+                    type: Date,
+                    default: Date.now
+                }
+            }
+        ]
 
     },
     {

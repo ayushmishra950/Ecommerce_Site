@@ -300,4 +300,11 @@ export const deleteRating = async (id: string) => {
 
 
 
+export const addRatingHelpful = async (id: string) => {
+    const res = await api.post(`/api/user/rating/helpful/${id}`);
+    return res;
+}
+
+
+
 

@@ -246,11 +246,96 @@ const deleteRating = async (req, res) => {
 };
 
 
+
+const addHelpful = async (req, res) => {
+  try {
+    const { ratingId } = req.params;
+    const userId = req.user.id;
+
+    const rating = await Rating.findById(ratingId);
+
+    if (!rating) {
+      return res.status(404).json({ message: "Rating not found" });
+    }
+
+    // check already marked helpful or not
+    const alreadyHelpful = rating.helpful.includes(userId);
+
+    if (alreadyHelpful) {
+      rating.helpful.pull(userId); // remove
+    } else {
+      rating.helpful.push(userId); // add
+    }
+
+    await rating.save();
+
+    res.status(200).json({
+      success: true,
+      message: alreadyHelpful
+        ? "Helpful removed"
+        : "Marked as helpful",
+      helpfulCount: rating.helpful.length
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+const addReplyComment = async (req, res) => {
+  try {
+    const { ratingId } = req.params;
+    const { comment } = req.body;
+    const userId = req.user.id;
+
+    if (!comment) {
+      return res.status(400).json({
+        success: false,
+        message: "Comment is required"
+      });
+    }
+
+    const rating = await Rating.findById(ratingId);
+
+    if (!rating) {
+      return res.status(404).json({
+        success: false,
+        message: "Rating not found"
+      });
+    }
+
+    // push reply
+    rating.replyComment.push({
+      user: userId,
+      comment: comment
+    });
+
+    await rating.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Reply added successfully",
+      replies: rating.replyComment
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 module.exports = {
     addRating,
     getProductRatings,
     getUnratedProducts,
     getShopRatings,
     updateRating,
-    deleteRating
+    deleteRating,
+    addHelpful,
+    addReplyComment
 };

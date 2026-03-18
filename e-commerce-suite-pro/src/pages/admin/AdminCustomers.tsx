@@ -341,7 +341,7 @@ const currentDate = new Date().toISOString().split("T")[0];
         </div>
 
         {/* Order Items */}
-        <div className="border rounded-lg p-4">
+        <div className="border rounded-lg p-4 max-h-[400px] overflow-y-auto">
           <h3 className="font-semibold text-lg mb-3">Order Items</h3>
 
           {selectedCustomer.orderItems?.map((item) => (

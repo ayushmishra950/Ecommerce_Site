@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { getProductById, getProductByCategoryId, addCart } from "@/services/service";
+import { getProductById, getProductByCategoryId, addCart, addRatingHelpful } from "@/services/service";
 import { addToCart, incrementQuantity, decrementQuantity } from '@/redux-toolkit/slice/cartSlice';
 import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
 import { calculateDiscount } from "@/services/allFunction";
@@ -69,7 +69,7 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  const [relatedProducts, setRelatedProducts] = useState<any>([])
+  const [relatedProducts, setRelatedProducts] = useState<any>([]);
   const dispatch = useAppDispatch();
   const items = useAppSelector((state) => state?.cart?.cartList);
 
@@ -117,9 +117,21 @@ const ProductDetail = () => {
 
   useEffect(() => {
     handleGetProduct();
-  }, []);
+  }, [id]);
 
-
+  const handleAddHelpful = async(id) =>{
+    try{
+       const res = await addRatingHelpful(id);
+       if(res.status===200){
+        toast({title:"Helpful Updated.", description:res.data.message});
+        handleGetProduct();
+       }
+    }
+    catch(err){
+      console.log(err);
+      toast({title:"Error Helpful.", description:err?.response?.data?.message || err?.message, variant:"destructive"})
+    }
+  }
 
   const handleAddCart = async (product) => {
     let quantity = 1;
@@ -605,9 +617,9 @@ const ratingDistribution = [5,4,3,2,1].map((star) => {
                     <h5 className="font-semibold text-gray-900 mb-2">{review.title}</h5>
                     <p className="text-gray-700 leading-relaxed mb-4">{review.feedback}</p>
                     <div className="flex items-center gap-4 text-sm">
-                      <button className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors">
+                      <button onClick={()=>{handleAddHelpful(review?._id)}} className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors">
                         <ThumbsUp className="w-4 h-4" />
-                        Helpful ({review.helpful})
+                        Helpful ({review.helpful?.length > 0 && review?.helpful?.length})
                       </button>
                       <button className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors">
                         <MessageCircle className="w-4 h-4" />

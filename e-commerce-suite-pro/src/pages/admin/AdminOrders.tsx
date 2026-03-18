@@ -144,7 +144,7 @@ const AdminOrders = () => {
                       </div>
                     </td>
                     <td className="py-4 px-6 text-sm text-muted-foreground">{order.orderItems?.length} items</td>
-                    <td className="py-4 px-6 text-sm font-medium text-foreground">${order.subtotal}</td>
+                    <td className="py-4 px-6 text-sm font-medium text-foreground">₹{order.subtotal}</td>
                     <td className="py-4 px-6">
                       <Badge className={getStatusColorFromOrder(order.orderStatus)}>
                         {order.orderStatus}

@@ -1,6 +1,7 @@
 const User = require("../../models/user.model");
 const Admin = require("../../models/admin.model");
 const Order = require("../../models/order.model");
+const mongoose = require("mongoose");
 
 /**
  * ============================
@@ -30,7 +31,7 @@ const checkAdminRole = async (userId, onlySuperAdmin = false) => {
  * GET ALL USERS
  * Admin & SuperAdmin
  * ============================
- */
+//  */
 const getAllUsers = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -43,7 +44,45 @@ const getAllUsers = async (req, res) => {
       });
     }
 
-    const users = await Order.find({shop:roleCheck?.admin?.shopId}).select("-password");
+    const users = await Order.aggregate([
+      {
+        $match: {
+          shop: roleCheck?.admin?.shopId,
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $group: {
+          _id: "$user",
+
+          orderData: { $first: "$$ROOT" }, // latest order
+
+          totalOrders: { $sum: 1 },
+
+          totalSpend: { $sum: "$totalAmount" },
+
+          allOrderItems: { $push: "$orderItems" }, // all items
+        },
+      },
+      {
+        $addFields: {
+          "orderData.totalOrders": "$totalOrders",
+          "orderData.totalAmount": "$totalSpend",
+          "orderData.orderItems": {
+            $reduce: {
+              input: "$allOrderItems",
+              initialValue: [],
+              in: { $concatArrays: ["$$value", "$$this"] },
+            },
+          },
+        },
+      },
+      {
+        $replaceRoot: { newRoot: "$orderData" },
+      },
+    ]);
 
     res.status(200).json({
       success: true,
@@ -58,7 +97,6 @@ const getAllUsers = async (req, res) => {
     });
   }
 };
-
 /**
  * ============================
  * GET SINGLE USER
