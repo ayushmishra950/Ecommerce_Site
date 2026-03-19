@@ -274,6 +274,12 @@ const addHelpful = async (req, res) => {
             return res.status(404).json({ message: "Rating not found" });
         }
 
+        const product = await Product.findOne({_id:rating?.productId});
+        if(!product) return res.status(404).json({message:"Product Not Found."});
+
+        const isBlocked = await ShopBlockedUser.findOne({shop:product?.shopId, user:userId, isBlocked:true});
+        if(isBlocked) return res.status(403).json({message:"You are temperary blocked. Please Contact to admin."}) 
+        
         // check already marked helpful or not
         const alreadyHelpful = rating.helpful.includes(userId);
 
@@ -321,6 +327,13 @@ const addReplyComment = async (req, res) => {
                 message: "Rating not found"
             });
         }
+
+          const product = await Product.findOne({_id:rating?.productId});
+        if(!product) return res.status(404).json({message:"Product Not Found."});
+
+        const isBlocked = await ShopBlockedUser.findOne({shop:product?.shopId, user:userId, isBlocked:true});
+        if(isBlocked) return res.status(403).json({message:"You are temperary blocked. Please Contact to admin."}) 
+        
 
         // push reply
         rating.replyComment.push({

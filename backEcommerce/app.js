@@ -1,9 +1,11 @@
 const express = require("express");
+const http = require("http");
 const setupSwagger = require("./swagger/swagger");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const { connectDB } = require("./config/db");
-const { protect } = require("./middlewares/auth.middleware")
+const { protect } = require("./middlewares/auth.middleware");
+const {initSocket} = require("./utils/socket.util");
 
 // user k liye
 const userAuthRoutes = require("./routes/user/auth.route");
@@ -32,6 +34,8 @@ const superAdminShopRoute = require("./routes/super-admin/shop-route");
 
 const app = express();
 connectDB();
+
+ 
 
 // Body parser
 app.use(express.json());
@@ -74,4 +78,20 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Something went wrong!" });
 });
 
-module.exports = app;
+
+
+const startServer = async () => {
+  try {
+    await connectDB(); // ✅ wait karega
+
+    const server = http.createServer(app);
+    initSocket(server);
+
+     return server;
+  } catch (error) {
+    console.error("Error starting server:", error);
+  }
+};
+
+
+module.exports = startServer;

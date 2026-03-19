@@ -1,14 +1,15 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-const {connectDB} = require("./config/db");
-const app = require("./app");
+const startServer = require("./app");
 
-// Connect Database
-// connectDB();
 
-const PORT = Number(process.env.PORT);
+const init = async () => {
+  const server = await startServer(); // ✅ await zaroori hai
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+  server.listen(5000, () => {
+    console.log("Server running on port 5000");
+  });
+};
+
+init();
