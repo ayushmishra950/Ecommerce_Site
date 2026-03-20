@@ -178,7 +178,7 @@ const AdminSingleProduct = () => {
                 <div className="max-w-7xl mx-auto space-y-6">
 
                     {/* Top Navigation / Breadcrumbs */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex  justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <Button
                                 variant="outline"
@@ -201,7 +201,7 @@ const AdminSingleProduct = () => {
                                     </Badge>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-zinc-500">
-                                    <span className="font-mono">PD-Id:{product._id}</span>
+                                    <span className="font-mono hidden md:inline-block">PD-Id:{product._id}</span>
                                     <span className="w-1 h-1 bg-zinc-300 rounded-full" />
                                     <span>Updated {new Date(product.updatedAt).toLocaleDateString()}</span>
                                 </div>
@@ -209,9 +209,9 @@ const AdminSingleProduct = () => {
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <Button variant="outline" className="rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center gap-2">
+                            {/* <Button variant="outline" className="rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center gap-2">
                                 <Eye size={16} /> <span className="hidden xs:inline">Preview Shop</span>
-                            </Button>
+                            </Button> */}
                             <Button onClick={() => { setInitialData(product); setProductDialogOpen(true) }} className="rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-50 dark:hover:bg-zinc-200 dark:text-zinc-900 flex items-center gap-2">
                                 <Edit size={16} /> <span>Edit Details</span>
                             </Button>
@@ -339,7 +339,7 @@ const AdminSingleProduct = () => {
                         {/* Right Side - Details & Controls */}
                         <div className="lg:col-span-2">
                             <Tabs defaultValue="overview" className="w-full">
-                                <TabsList className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-1 rounded-xl w-full sm:w-auto h-auto grid grid-cols-2 sm:flex sm:flex-nowrap gap-1">
+                                <TabsList className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-1 rounded-xl w-[330px] md:w-full h-auto">
                                     <TabsTrigger value="overview" className="rounded-lg py-2 px-4 data-[state=active]:bg-zinc-100 dark:data-[state=active]:bg-zinc-800 data-[state=active]:shadow-none">Overview</TabsTrigger>
                                     <TabsTrigger value="marketing" className="rounded-lg py-2 px-4 data-[state=active]:bg-zinc-100 dark:data-[state=active]:bg-zinc-800">Marketing</TabsTrigger>
                                     <TabsTrigger value="reviews" className="rounded-lg py-2 px-4 data-[state=active]:bg-zinc-100 dark:data-[state=active]:bg-zinc-800">Feedback</TabsTrigger>

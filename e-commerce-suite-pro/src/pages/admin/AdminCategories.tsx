@@ -124,7 +124,7 @@ const AdminCategories = () => {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}  >
-            <SelectTrigger className="w-[120px] md:w-[180px]">
+            <SelectTrigger className="w-[80px] md:w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent className='w-[80px] md:w-full' >
@@ -135,7 +135,7 @@ const AdminCategories = () => {
           </Select>
 
           {/* Right side button */}
-          <Button className="ml-auto w-[80px] text-xs md:w-full md:text-sm " onClick={() => { setInitialData(null); setIsOpen(true) }}>
+          <Button className="ml-auto w-[90px] text-xs md:w-[110px] md:text-sm " onClick={() => { setInitialData(null); setIsOpen(true) }}>
             Add Category
           </Button>
         </div>
@@ -146,19 +146,19 @@ const AdminCategories = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="text-left py-4 px-6 text-sm text-muted-foreground">
+                    <th className="text-left py-4 px-2 md:px-6 text-sm text-muted-foreground">
                       Category Name
                     </th>
-                    <th className="text-left py-4 px-6 text-sm text-muted-foreground">
+                    <th className="text-left py-4 px-2 md:px-6 text-sm text-muted-foreground">
                       Products
                     </th>
-                    <th className="text-left py-4 px-6 text-sm text-muted-foreground">
+                    <th className="text-left py-4 px-2 md:px-6 text-sm text-muted-foreground">
                       Status
                     </th>
-                    <th className="text-left py-4 px-6 text-sm text-muted-foreground hidden md:inline-block ">
+                    <th className="text-left py-4 px-2 md:px-6 text-sm text-muted-foreground hidden md:table-cell">
                       Created At
                     </th>
-                    <th className="text-left py-4 px-6 text-sm text-muted-foreground">
+                    <th className="text-left py-4 px-2 md:px-6 text-sm text-muted-foreground">
                       Actions
                     </th>
                   </tr>
@@ -169,24 +169,24 @@ const AdminCategories = () => {
                       key={category._id}
                       className="border-b last:border-0 hover:bg-muted/30 transition-colors"
                     >
-                      <td className="py-4 px-6 text-sm font-medium">
+                      <td className="py-4 px-2 md:px-6 text-sm font-medium">
                         {category?.name?.charAt(0).toUpperCase() + category?.name?.slice(1)}
                       </td>
-                      <td className="py-4 px-6 text-sm text-muted-foreground">
+                      <td className="py-4 px-2 md:px-6 text-sm text-muted-foreground">
                         {category.product.length}
                       </td>
 
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-2 md:px-6">
                         <Badge variant={getStatusVariant(category.isActive === true ? "active" : "inactive")}>
                           {category.isActive === true ? "Active" : "Inactive"}
                         </Badge>
                       </td>
 
-                      <td className="py-4 px-6 text-sm text-muted-foreground hidden md:inline-block">
+                      <td className="py-4 px-2 md:px-6 text-sm text-muted-foreground hidden md:table-cell">
                         {formatDate(category.createdAt)}
                       </td>
 
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-2 md:px-6">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">

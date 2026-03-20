@@ -86,13 +86,12 @@ const AdminOrders = () => {
       setStatusDialogOpen(false);
       setCurrentStatus("");
     }
-  }
-  console.log(orderData)
+  };
   return (
     <>
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -124,34 +123,34 @@ const AdminOrders = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
-                  <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Order ID</th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Customer</th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Items</th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Total</th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Date</th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-muted-foreground">Actions</th>
+                  <th className="text-left py-4 px-2 md:px-6 text-sm font-medium text-muted-foreground hidden md:table-cell">Order ID</th>
+                  <th className="text-left py-4 px-2 md:px-6 text-sm font-medium text-muted-foreground">Customer</th>
+                  <th className="text-left py-4 px-2 md:px-6 text-sm font-medium text-muted-foreground">Items</th>
+                  <th className="text-left py-4 px-2 md:px-6 text-sm font-medium text-muted-foreground hidden md:table-cell">Total</th>
+                  <th className="text-left py-4 px-2 md:px-6 text-sm font-medium text-muted-foreground ">Status</th>
+                  <th className="text-left py-4 px-2 md:px-6 text-sm font-medium text-muted-foreground hidden md:table-cell">Date</th>
+                  <th className="text-left py-4 px-2 md:px-6 text-sm font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredOrders.map((order, i) => (
                   <tr key={order._id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer" onClick={()=>{setOrderData(order); setOrderDialogOpen(true)}}>
-                    <td className="py-4 px-6 text-sm font-medium text-foreground">ORD-{new Date().getFullYear()}-{i+1}</td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-2 md:px-6 text-sm font-medium text-foreground hidden md:table-cell">ORD-{new Date().getFullYear()}-{i+1}</td>
+                    <td className="py-4 px-2 md:px-6">
                       <div>
                         <p className="text-sm font-medium text-foreground">{order.shippingAddress?.name}</p>
                         <p className="text-xs text-muted-foreground">{order.shippingAddress?.name}</p>
                       </div>
                     </td>
-                    <td className="py-4 px-6 text-sm text-muted-foreground">{order.orderItems?.length} items</td>
-                    <td className="py-4 px-6 text-sm font-medium text-foreground">₹{order.subtotal}</td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-2 md:px-6 text-sm text-muted-foreground">{order.orderItems?.length} items</td>
+                    <td className="py-4 px-2 md:px-6 text-sm font-medium text-foreground hidden md:table-cell">₹{order.subtotal}</td>
+                    <td className="py-4 px-2 md:px-6 ">
                       <Badge className={getStatusColorFromOrder(order.orderStatus)}>
                         {order.orderStatus}
                       </Badge>
                     </td>
-                    <td className="py-4 px-6 text-sm text-muted-foreground">{formatDate(order.createdAt)}</td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-2 md:px-6 text-sm text-muted-foreground hidden md:table-cell">{formatDate(order.createdAt)}</td>
+                    <td className="py-4 px-2 md:px-6">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -184,8 +183,8 @@ const AdminOrders = () => {
   <DialogContent>
     
     <DialogHeader>
-      <DialogTitle>Update Order Status</DialogTitle>
-      <DialogDescription>
+      <DialogTitle className='flex'>Update Order Status</DialogTitle>
+      <DialogDescription className='flex text-left'>
         Update the current status of this order to reflect its latest progress. 
         Select the appropriate stage from the list below and confirm to save the changes.
       </DialogDescription>
@@ -227,11 +226,11 @@ const AdminOrders = () => {
 </Dialog>
 
 <Sheet open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>
-  <SheetContent className="overflow-y-auto w-[420px] sm:w-[540px]">
+  <SheetContent className="overflow-y-auto md:w-[420px]">
 
     <SheetHeader>
-      <SheetTitle>Order Details</SheetTitle>
-      <SheetDescription>
+      <SheetTitle className='flex'>Order Details</SheetTitle>
+      <SheetDescription className='flex'>
         Complete information about this order
       </SheetDescription>
     </SheetHeader>

@@ -102,7 +102,7 @@ const AdminProducts = () => {
       <AddProductDialog open={productDialogOpen} setProductListRefresh={setProductListRefresh} initialData={initialData} onOpenChange={() => { setProductDialogOpen(false) }} />
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+        <div className="flex gap-4">
           {/* Left: Search */}
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

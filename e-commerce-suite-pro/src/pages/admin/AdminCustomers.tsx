@@ -5,19 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu';
 import {getAllCustomer, blockAndUnBlockCustomer, getAllBlockCustomerList} from "@/services/service";
 import {formatDate} from "@/services/allFunction";
 import {Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetOverlay, SheetPortal, SheetTitle, SheetTrigger,} from "@/components/ui/sheet";
@@ -153,8 +142,8 @@ const currentDate = new Date().toISOString().split("T")[0];
     <>
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex  gap-4">
+        <div className="relative w-[225px] md:w-[780px] ">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search customers..."
@@ -165,7 +154,7 @@ const currentDate = new Date().toISOString().split("T")[0];
         </div>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[120px] md:w-[180px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -178,18 +167,18 @@ const currentDate = new Date().toISOString().split("T")[0];
       </div>
 
       {/* Customers Table */}
-      <Card>
+      <Card className='w-[360px] md:w-full'>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-[357px] md:w-full">
               <thead>
                 <tr className="border-b bg-muted/50">
-                  <th className="text-left py-4 px-6 text-sm text-muted-foreground">Customer</th>
-                  <th className="text-left py-4 px-6 text-sm text-muted-foreground">Orders</th>
-                  <th className="text-left py-4 px-6 text-sm text-muted-foreground">Total Spent</th>
-                  <th className="text-left py-4 px-6 text-sm text-muted-foreground">Status</th>
-                  <th className="text-left py-4 px-6 text-sm text-muted-foreground">Joined</th>
-                  <th className="text-left py-4 px-6 text-sm text-muted-foreground">Actions</th>
+                  <th className="text-left py-4 px-3 md:px-6 text-sm text-muted-foreground">Customer</th>
+                  <th className="text-left py-4 px-3 md:px-6 text-sm text-muted-foreground">Orders</th>
+                  <th className="text-left py-4 px-3 md:px-6 text-sm text-muted-foreground hidden md:table-cell">Total Spent</th>
+                  <th className="text-left py-4 px-3 md:px-6 text-sm text-muted-foreground">Status</th>
+                  <th className="text-left py-4 px-3 md:-6 text-sm text-muted-foreground hidden md:table-cell">Joined</th>
+                  <th className="text-left py-4 px-3 md:px-6 text-sm text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -201,7 +190,7 @@ const currentDate = new Date().toISOString().split("T")[0];
                     className="border-b last:border-0 hover:bg-muted/30 transition-colors cursor-pointer"
                     onClick={()=>{setIsBlock(isBlocked?true:false);setSelectedCustomer(customer);setCustomerDetailOpen(true)}}
                   >
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-3 md:px-6">
                       <div>
                         <p className="text-sm font-medium">{customer?.shippingAddress?.name}</p>
                         <p className="text-xs text-muted-foreground">
@@ -210,23 +199,23 @@ const currentDate = new Date().toISOString().split("T")[0];
                       </div>
                     </td>
 
-                    <td className="py-4 px-6 text-sm">{customer?.orderItems?.length}</td>
+                    <td className="py-4 px-3 md:px-6 text-sm">{customer?.orderItems?.length}</td>
 
-                    <td className="py-4 px-6 text-sm font-medium">
+                    <td className="py-4 px-3 md:px-6 text-sm font-medium hidden md:table-cell">
                       ₹{customer?.totalAmount}
                     </td>
 
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-3 md:px-6">
                       <Badge variant={getStatusVariant(isBlocked?"blocked":"active")}>
                         {isBlocked?"Block":"Active"}
                       </Badge>
                     </td>
 
-                    <td className="py-4 px-6 text-sm text-muted-foreground">
+                    <td className="py-4 px-3 md:px-6 text-sm text-muted-foreground hidden md:table-cell">
                       {formatDate(customer?.createdAt)}
                     </td>
 
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-3 md:px-6">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -256,9 +245,9 @@ const currentDate = new Date().toISOString().split("T")[0];
     </div>
    <Dialog open={blockDetailOpen} onOpenChange={setBlockDetailOpen}>
   <DialogContent>
-    <DialogHeader>
-      <DialogTitle>{isBlock?"UnBlock":"Block"} Customer</DialogTitle>
-      <DialogDescription>
+    <DialogHeader >
+      <DialogTitle className='flex'>{isBlock?"UnBlock":"Block"} Customer</DialogTitle>
+      <DialogDescription className='flex'>
         Please provide the details before {isBlock?"UnBlock":"Block"} this customer.
       </DialogDescription>
     </DialogHeader>
@@ -312,14 +301,14 @@ const currentDate = new Date().toISOString().split("T")[0];
   </DialogContent>
 </Dialog>
    <Sheet open={customerDetailOpen} onOpenChange={setCustomerDetailOpen}>
-  <SheetContent className="overflow-y-auto w-[500px]">
+  <SheetContent className="overflow-y-auto md:w-[500px]">
     <SheetHeader>
       <SheetTitle className='flex justify-between mt-4'>
         <span>Customer Detail</span>
         <div> <Badge variant={getStatusVariant(isBlock?"blocked":"active")}>
                         {isBlock?"Block":"Active"} </Badge></div>
       </SheetTitle>
-      <SheetDescription>Order Information</SheetDescription>
+      <SheetDescription className='flex'>Order Information</SheetDescription>
     </SheetHeader>
 
     {selectedCustomer && (

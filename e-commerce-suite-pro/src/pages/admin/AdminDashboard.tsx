@@ -110,7 +110,7 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+     <div className="flex flex-col md:flex-row w-[370px] md:w-full gap-6">
   <Card>
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
@@ -253,25 +253,25 @@ const AdminDashboard = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Order ID</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Customer</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Total</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Action</th>
+                  <th className="text-left py-3 px-2 md:px-4 text-sm font-medium text-muted-foreground hidden md:table-cell">Order ID</th>
+                  <th className="text-left py-3 px-2 md:px-4 text-sm font-medium text-muted-foreground">Customer</th>
+                  <th className="text-left py-3 px-2 md:px-4 text-sm font-medium text-muted-foreground">Total</th>
+                  <th className="text-left py-3 px-2 md:px-4 text-sm font-medium text-muted-foreground">Status</th>
+                  <th className="text-left py-3 px-2 md:px-4 text-sm font-medium text-muted-foreground">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {orderList.slice(0,8).map((order) => (
                   <tr key={order._id} className="border-b border-border last:border-0">
-                    <td className="py-3 px-4 text-sm font-medium text-foreground">ORD-{new Date().getFullYear()}-{order._id.slice(-4)}</td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{order.user?.name}</td>
-                    <td className="py-3 px-4 text-sm font-medium text-foreground">₹{order.totalAmount}</td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2 md:px-4 text-sm font-medium text-foreground hidden md:table-cell">ORD-{new Date().getFullYear()}-{order._id.slice(-4)}</td>
+                    <td className="py-3 px-2 md:px-4 text-sm text-muted-foreground">{order.user?.name}</td>
+                    <td className="py-3 px-2 md:px-4 text-sm font-medium text-foreground">₹{order.totalAmount}</td>
+                    <td className="py-3 px-2 md:px-4">
                       <Badge variant={getStatusVariant(order.orderStatus)}>
                         {order.orderStatus}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2 md:px-4">
                       <button className="text-primary hover:underline text-sm flex items-center gap-1">
                         View <ArrowUpRight className="h-3 w-3" />
                       </button>
