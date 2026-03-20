@@ -113,21 +113,21 @@ const AdminCategories = () => {
       <DeleteModal buttonName='Delete' isOpen={isDeleteDialogOpen} isDeleteLoading={isDeleteLoading} onClose={() => { setIsDeleteDialogOpen(false) }} onConfirm={handleDeleteCategory} title='Confirm Deletion.' description='This action will permanently delete the category. Are you sure you want to proceed?' />
       <div className="space-y-6">
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center">
+        <div className="flex md:flex-row  gap-4 items-center">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search categories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 placeholder:text-xs md:placeholder:text-sm"
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
+          <Select value={statusFilter} onValueChange={setStatusFilter}  >
+            <SelectTrigger className="w-[120px] md:w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className='w-[80px] md:w-full' >
               <SelectItem value="all" className='cursor-pointer'>All Categories</SelectItem>
               <SelectItem value="active" className='cursor-pointer'>Active</SelectItem>
               <SelectItem value="inactive" className='cursor-pointer'>Inactive</SelectItem>
@@ -135,7 +135,7 @@ const AdminCategories = () => {
           </Select>
 
           {/* Right side button */}
-          <Button className="ml-auto" onClick={() => { setInitialData(null); setIsOpen(true) }}>
+          <Button className="ml-auto w-[80px] text-xs md:w-full md:text-sm " onClick={() => { setInitialData(null); setIsOpen(true) }}>
             Add Category
           </Button>
         </div>
@@ -155,7 +155,7 @@ const AdminCategories = () => {
                     <th className="text-left py-4 px-6 text-sm text-muted-foreground">
                       Status
                     </th>
-                    <th className="text-left py-4 px-6 text-sm text-muted-foreground">
+                    <th className="text-left py-4 px-6 text-sm text-muted-foreground hidden md:inline-block ">
                       Created At
                     </th>
                     <th className="text-left py-4 px-6 text-sm text-muted-foreground">
@@ -182,7 +182,7 @@ const AdminCategories = () => {
                         </Badge>
                       </td>
 
-                      <td className="py-4 px-6 text-sm text-muted-foreground">
+                      <td className="py-4 px-6 text-sm text-muted-foreground hidden md:inline-block">
                         {formatDate(category.createdAt)}
                       </td>
 

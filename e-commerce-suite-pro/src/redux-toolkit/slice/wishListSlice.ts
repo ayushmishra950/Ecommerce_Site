@@ -3,7 +3,6 @@ import {createSlice, PayloadAction } from "@reduxjs/toolkit";
 const initialState = {
     wishList: []
 };
-const user = JSON.parse(localStorage.getItem("user"));
 
 const wishListSlice = createSlice({
     name: "wishList",
