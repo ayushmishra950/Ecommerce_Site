@@ -41,7 +41,7 @@ export const CategorySection = () => {
           <p className="text-muted-foreground">Find exactly what you're looking for</p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="flex max-w-[400px] md:max-w-full overflow-x-auto gap-4 thin-scroll">
           {categoryList?.map((category) => {
             const Icon = iconMap[category.icon] || Smartphone;
             return (

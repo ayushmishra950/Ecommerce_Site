@@ -163,7 +163,7 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className=" flex flex-col w-[95vw] sm:w-[90vw] max-h-[95vh] md:max-w-4xl p-0 overflow-hidden bg-zinc-50 dark:bg-zinc-950 border-none rounded-xl sm:rounded-2xl shadow-2xl transition-all">
                 <DialogHeader className="p-4 sm:p-6 bg-white dark:bg-zinc-900 border-b">
-                    <div className="flex items-center justify-between gap-2 sm:gap-4">
+                    <div className="flex  justify-between gap-2 sm:gap-4">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                             <div className="hidden sm:block p-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-zinc-600 dark:text-zinc-400 shrink-0">
                                 <Box size={20} />
@@ -177,14 +177,14 @@ const OrderProductDetailModal: React.FC<OrderProductDetailModalProps> = ({
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                            <div className="hidden xs:block">
+                        <div className="flex mr-8 gap-1 sm:gap-2 shrink-0">
+                            <div className="hidden sm:block ">
                                 <Badge className={getStatusColorFromOrder(data.status)} >{data?.status}</Badge>
                             </div>
 
                         </div>
                     </div>
-                    <div className="xs:hidden mt-2">
+                    <div className="xs:hidden mt-2 flex justify-start">
                         <Badge className={getStatusColorFromOrder(data?.status)} >{data?.status}</Badge>
                     </div>
                 </DialogHeader>

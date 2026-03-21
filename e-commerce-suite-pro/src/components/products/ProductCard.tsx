@@ -129,7 +129,7 @@ export const ProductCard = ({ product }) => {
           variant="secondary"
           size="icon"
           className={cn(
-            'absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity',
+            'absolute top-3 right-3 md:opacity-0 md:group-hover:opacity-100 transition-opacity',
             isWishlisted && 'opacity-100'
           )}
           onClick={() => { handleAddAndRemoveWishlist(product) }}
@@ -143,7 +143,8 @@ export const ProductCard = ({ product }) => {
         <div
           className={cn(
             'absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-foreground/80 to-transparent',
-            'translate-y-full group-hover:translate-y-0 transition-transform duration-300'
+            'translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-300'
+   
           )}
         >
           <Button
