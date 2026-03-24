@@ -8,13 +8,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from "@/redux-toolkit/store/store";
-import { decrementQuantity, incrementQuantity, removeFromCart, setCartList, setCartSummary } from '@/redux-toolkit/slice/cartSlice';
+import { addToCart, decrementQuantity, incrementQuantity, removeFromCart, setCartList, setCartSummary } from '@/redux-toolkit/slice/cartSlice';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { getCart, removeCart, clearCart, updateCart, addAndRemoveProductWishList } from "@/services/service";
 import { calculateDiscount } from "@/services/allFunction";
 import { useAppSelector } from '@/redux-toolkit/hooks/hook';
+import socket from "@/socket/socket";
 
 // Recommended Products Dummy Data
 const recommendedProducts = [
@@ -53,19 +54,31 @@ const Cart = () => {
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [discount, setDiscount] = useState(0);
   const [savedItems, setSavedItems] = useState<any[]>([]);
-  // const [cartList, setCartList] = useState([]);
   const [cartListRefresh, setCartListRefresh] = useState(false);
-  // const [cartSummary, setCartSummary] = useState({
-  //   subtotal: 0,
-  //   tax: 0,
-  //   shipping: 0,
-  //   totalPrice: 0,
-  //   totalDiscount: 0,
-  //   taxBreakdown: [],
-  //   coupons : 0
-  // });
+ 
   const cartList = useAppSelector((state)=>state?.cart?.cartList);
    const cartSummary = useAppSelector((state)=> state?.cart?.cartSummary);
+   console.log(cartList);
+
+  //  useEffect(()=>{
+  //   socket.on("addCart", (data)=>{
+  //     dispatch(addToCart(data));
+  //   })
+
+  //   return () => socket.off("addCart")
+
+  //  },[])
+
+  useEffect(() => {
+    socket.on("addCart", (cart) => {
+      console.log("hiiiii")
+        dispatch(addToCart(cart)); // pura cart replace karo
+    });
+
+    return () =>{
+      socket.off("addCart");
+    }
+}, []);
 
   const handleUpdateCart = async (id, quantity, type) => {
     try {

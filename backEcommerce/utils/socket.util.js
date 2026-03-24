@@ -9,14 +9,11 @@ let users = {};
    
 io.on("connection", (socket)=>{
     console.log("user connected", socket.id);
-    socket.on("login",(userId)=>{
-      users[userId] = socket.id;
+    socket.on("joinRoom",(userId)=>{
+      socket.join(userId);
     })
-    socket.on("addCart", (userId)=>{
-       let targetSocketId = users[userId];
-       if (targetSocketId) {
-            io.to(targetSocketId).emit("addCart", data);
-        }
+    socket.on("addCart", (userId, product)=>{
+            io.to(userId).emit("addCart", product);
     })
 
 

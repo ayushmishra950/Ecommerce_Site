@@ -13,7 +13,7 @@ import { addAndRemoveProductWishList, getProductToWishlist, addCart } from "@/se
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { calculateDiscount } from "@/services/allFunction";
-
+import socket from "@/socket/socket";
 
 export const ProductCard = ({ product }) => {
   const { user } = useAuth();
@@ -41,7 +41,8 @@ export const ProductCard = ({ product }) => {
     
       console.log(res)
       if (res.status === 200 || res.status === 201) {
-        dispatch(addAndRemoveWishList(product));
+        socket.emit("addCart",user?.id, product);
+        // dispatch(addAndRemoveWishList(product));
         setWishListRefresh(true)
         toast({ title: item?.product?._id ? "Remove Item To Wishlist." : "Add Item To Wishlist.", description: res?.data?.message })
       }
