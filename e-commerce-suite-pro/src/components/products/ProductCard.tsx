@@ -34,15 +34,13 @@ export const ProductCard = ({ product }) => {
   const handleAddAndRemoveWishlist = async (product) => {
 
     const item = wishList.find((v) => v?.product?._id === product?._id);
-   console.log(item)
     try {
       let res = null;
       res = await addAndRemoveProductWishList(product?._id);
     
       console.log(res)
       if (res.status === 200 || res.status === 201) {
-
-        dispatch(addAndRemoveWishList(product));
+        socket.emit("addAndRemovewishList", product)
         setWishListRefresh(true)
         toast({ title: item?.product?._id ? "Remove Item To Wishlist." : "Add Item To Wishlist.", description: res?.data?.message })
       }

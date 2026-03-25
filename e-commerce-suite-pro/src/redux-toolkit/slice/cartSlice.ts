@@ -1,18 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import {CartItem } from "@/types";
+import { CartItem } from "@/types";
 
- interface CartQuantity extends CartItem {
+interface CartQuantity extends CartItem {
     quantity: number;
     totalPrice: number;
 }
- interface Carts {
+interface Carts {
     cartList: CartQuantity[];
-    cartSummary: any ;
+    cartSummary: any;
 }
 
 const initialState: Carts = {
     cartList: [],
-    cartSummary:null,
+    cartSummary: null,
 };
 
 
@@ -50,15 +50,15 @@ const cartSlice = createSlice({
                 item.totalPrice = item.price * item.quantity;
             }
         },
-        setCartList: (state, action)=>{
+        setCartList: (state, action) => {
             state.cartList = action.payload;
         },
-        setCartSummary: (state, action)=>{
+        setCartSummary: (state, action) => {
             state.cartSummary = action.payload;
         }
 
     },
 });
 
-export const { addToCart, removeFromCart,setCartSummary, clearCart, incrementQuantity, decrementQuantity, setCartList } = cartSlice.actions;
+export const { addToCart, removeFromCart, setCartSummary, clearCart, incrementQuantity, decrementQuantity, setCartList } = cartSlice.actions;
 export default cartSlice.reducer;

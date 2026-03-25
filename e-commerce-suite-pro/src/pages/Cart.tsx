@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag, Heart, Truck, Shield, Package, Gift, ArrowLeft, Sparkles, Check, X,
+import {
+  Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag, Heart, Truck, Shield, Package, Gift, ArrowLeft, Sparkles, Check, X,
   Star,
   BadgePercent
 } from 'lucide-react';
@@ -55,10 +56,10 @@ const Cart = () => {
   const [discount, setDiscount] = useState(0);
   const [savedItems, setSavedItems] = useState<any[]>([]);
   const [cartListRefresh, setCartListRefresh] = useState(false);
- 
-  const cartList = useAppSelector((state)=>state?.cart?.cartList);
-   const cartSummary = useAppSelector((state)=> state?.cart?.cartSummary);
-   console.log(cartList);
+
+  const cartList = useAppSelector((state) => state?.cart?.cartList);
+  const cartSummary = useAppSelector((state) => state?.cart?.cartSummary);
+  console.log(cartList);
 
   //  useEffect(()=>{
   //   socket.on("addCart", (data)=>{
@@ -72,13 +73,13 @@ const Cart = () => {
   useEffect(() => {
     socket.on("addCart", (cart) => {
       console.log("hiiiii")
-        dispatch(addToCart(cart)); // pura cart replace karo
+      dispatch(addToCart(cart)); // pura cart replace karo
     });
 
-    return () =>{
+    return () => {
       socket.off("addCart");
     }
-}, []);
+  }, []);
 
   const handleUpdateCart = async (id, quantity, type) => {
     try {
@@ -116,13 +117,13 @@ const Cart = () => {
       if (res.status === 200) {
         dispatch(setCartList(res?.data?.cart?.items));
         let obj = {
-           subtotal: res?.data?.cart?.subtotal || 0,
+          subtotal: res?.data?.cart?.subtotal || 0,
           tax: res?.data?.cart?.tax || 0,
           shipping: res?.data?.cart?.shipping || 0,
           totalPrice: res?.data?.cart?.totalPrice || 0,
           totalDiscount: res?.data?.cart?.totalDiscount || 0,
           taxBreakdown: res?.data?.cart?.taxBreakdown || [],
-          coupons : res?.data?.cart?.coupons || 0
+          coupons: res?.data?.cart?.coupons || 0
         };
         dispatch(setCartSummary(obj));
         // setCartSummary({
@@ -533,8 +534,8 @@ const Cart = () => {
                 </div>
                 {/* )} */}
 
-             
-               {cartSummary?.coupons > 0 && <div className="flex justify-between text-green-600">
+
+                {cartSummary?.coupons > 0 && <div className="flex justify-between text-green-600">
                   <span className="flex items-center gap-1">
                     <Tag className="w-4 h-4" />
                     Coupon Discount ({discount}%)
@@ -543,7 +544,7 @@ const Cart = () => {
                     {/* {discountAmount.toFixed(2)} */}
                   </span>
                 </div>}
-               
+
 
                 <div className="flex justify-between text-gray-700">
                   <span className="flex items-center gap-1">

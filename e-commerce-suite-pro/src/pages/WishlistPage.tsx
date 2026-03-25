@@ -26,6 +26,7 @@ import { addToCart, removeFromCart } from '@/redux-toolkit/slice/cartSlice';
 import { addAndRemoveWishList, setWishList } from '@/redux-toolkit/slice/wishListSlice';
 import { addAndRemoveProductWishList, getProductToWishlist, clearWishList,allMoveToCart, moveToCart } from "@/services/service";
 import { useAuth } from "@/context/AuthContext";
+import socket from "@/socket/socket";
 
 
 const WishlistPage = () => {
@@ -38,6 +39,18 @@ const WishlistPage = () => {
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high'>('name');
   const [wishListRefresh, setWishListRefresh] = useState(false);
    const wishlist = useAppSelector((state)=> state?.wishList?.wishList);
+   console.log(wishlist);
+
+   useEffect(()=>{
+    socket.on("addAndRemovewishList", (data)=>{
+      console.log(data)
+       dispatch(addAndRemoveWishList(data));
+    });
+
+    return ()=>{
+      socket.off("addAndRemovewishList");
+    }
+   },[])
 
   const handleGetProducts = async () => {
     try {
