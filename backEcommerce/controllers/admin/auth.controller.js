@@ -65,7 +65,6 @@ exports.registerAdmin = async (req, res) => {
       admin: adminResponse,
     });
   } catch (error) {
-    console.error("Register Admin Error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -75,7 +74,6 @@ exports.registerAdmin = async (req, res) => {
 exports.loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(req.body)
     if(!email || !password) return res.status(400).json({ success: false, message: "Email and password are required."});
 
     let admin = await Admin.findOne({ email });
@@ -99,7 +97,6 @@ if(admin?.role==="admin"){
 
 const accessToken = generateAccessToken(payload);
 const refreshToken = generateRefreshToken(payload);
-  console.log(accessToken, refreshToken)
 
     // Save refresh token in DB (Recommended)
     admin.refreshToken = refreshToken;
@@ -108,7 +105,6 @@ const refreshToken = generateRefreshToken(payload);
       admin.lastLogin = new Date();
     }
     await admin.save();
-    console.log("admin", admin)
     // 🔐 Store Refresh Token in HttpOnly Cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -119,7 +115,6 @@ const refreshToken = generateRefreshToken(payload);
 
     res.status(200).json({ message: "Login successful", accessToken, admin });
   } catch (error) {
-  console.error(error); // Console me full error dekhne ke liye
   res.status(500).json({ message: "Server error", error: error.message});
 }
 
@@ -178,7 +173,6 @@ exports.getAdmins = async (req, res) => {
 exports.refreshToken = async (req, res) => {
   try {
     const oldRefreshToken = req.cookies.refreshToken;
-    console.log(oldRefreshToken)
 
     if (!oldRefreshToken)
       return res.status(401).json({ message: "No refresh token" });
@@ -380,7 +374,6 @@ exports.updateAdmin = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       message: "Server error",
       error: error.message

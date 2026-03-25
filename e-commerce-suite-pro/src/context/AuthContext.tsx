@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           shopId: response?.data?.admin?.shopId,
           createdBy: response?.data?.admin?.createdBy
         }
-        socket.emit("/login", response?.data?.admin?._id);
+        socket.emit("joinRoom", response?.data?.admin?._id);
         setUser(userInfo)
         localStorage.setItem('user', JSON.stringify(userInfo));
         

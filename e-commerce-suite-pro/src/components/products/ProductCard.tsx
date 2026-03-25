@@ -41,8 +41,8 @@ export const ProductCard = ({ product }) => {
     
       console.log(res)
       if (res.status === 200 || res.status === 201) {
-        socket.emit("addCart",user?.id, product);
-        // dispatch(addAndRemoveWishList(product));
+
+        dispatch(addAndRemoveWishList(product));
         setWishListRefresh(true)
         toast({ title: item?.product?._id ? "Remove Item To Wishlist." : "Add Item To Wishlist.", description: res?.data?.message })
       }
@@ -60,7 +60,8 @@ export const ProductCard = ({ product }) => {
       console.log(res)
       if (res.status === 201) {
         toast({ title: "Add Item To Cart.", description: res?.data?.message })
-        dispatch(addToCart(product))
+        socket.emit("addCart",user?.id, product);
+        // dispatch(addToCart(product))
 
       }
     }
