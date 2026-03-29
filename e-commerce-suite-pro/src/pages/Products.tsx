@@ -12,6 +12,8 @@ import { getProductByCategoryId, getProductsByUsers } from "@/services/service";
 import { Slider } from '@/components/ui/slider';
 import { setProductList } from "@/redux-toolkit/slice/productSlice";
 import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
+import socket from '@/socket/socket';
+import {connectSocket} from "@/socket/socket";
 
 const Products = () => {
   const { toast } = useToast();
@@ -101,6 +103,19 @@ const Products = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const accessToken = localStorage.getItem("accessToken");
+
+   useEffect(()=>{
+       socket.on("order", (product)=>{
+        console.log(product)
+        handleGetProduct();
+       })
+       connectSocket(accessToken);
+       return () => {
+        socket.off("order");
+       }
+    },[])
+
 
   const handleGetProduct = async () => {
     try {

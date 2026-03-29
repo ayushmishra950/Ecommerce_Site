@@ -13,6 +13,8 @@ import {Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHea
 import { useToast } from '@/hooks/use-toast';
 import { useAppDispatch, useAppSelector } from '@/redux-toolkit/hooks/hook';
 import { setCustomerList, setBlockCustomerList } from '@/redux-toolkit/slice/userSlice';
+import socket from '@/socket/socket';
+import {connectSocket} from "@/socket/socket";
 
 const getStatusVariant = (
   status: string
@@ -46,6 +48,18 @@ const currentDate = new Date().toISOString().split("T")[0];
 const dispatch = useAppDispatch();
 const customerList = useAppSelector((state)=> state?.user?.customerList);
 const blockCustomerList = useAppSelector((state)=> state?.user?.blockList);
+  const accessToken = localStorage.getItem("accessToken");
+
+ useEffect(()=>{
+     socket.on("order", (product)=>{
+      console.log(product)
+      handleGetCustomer();
+     })
+     connectSocket(accessToken);
+     return () => {
+      socket.off("order");
+     }
+  },[])
 
   const filteredCustomers = customerList?.filter((customer) => {
     const matchesSearch =

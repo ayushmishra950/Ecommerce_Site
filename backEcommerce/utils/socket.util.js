@@ -108,7 +108,7 @@ const initSocket = (server) => {
             }
 
             const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
+            console.log("decoded", decoded)
             socket.user = decoded;
             socket.userId = decoded.id;
             socket.role = decoded.role;     // user | admin

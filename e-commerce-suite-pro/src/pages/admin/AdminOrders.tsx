@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { useAppDispatch,useAppSelector } from '@/redux-toolkit/hooks/hook';
 import { setOrderList } from '@/redux-toolkit/slice/orderSlice';
 import socket from '@/socket/socket';
+import {connectSocket} from "@/socket/socket";
 
 const orders = [
   { id: '#ORD-001', customer: 'John Doe', email: 'john@example.com', items: 3, total: 299.99, status: 'delivered', date: '2024-01-20' },
@@ -41,6 +42,7 @@ const AdminOrders = () => {
   const [orderListRefresh, setOrderListRefresh] = useState(false);
   const dispatch = useAppDispatch();
   const orderList = useAppSelector((state)=> state?.order?.orderList);
+  const accessToken = localStorage.getItem("accessToken");
 
   const filteredOrders = orderList.filter(order => {
     const matchesSearch = order._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -54,8 +56,10 @@ const AdminOrders = () => {
   useEffect(()=>{
      socket.on("order", (product)=>{
       console.log(product)
-      dispatch(setOrderList(product));
+      setOrderListRefresh(true);
      })
+
+     connectSocket(accessToken);
      return () => {
       socket.off("order");
      }

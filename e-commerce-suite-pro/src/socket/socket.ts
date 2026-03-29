@@ -21,12 +21,12 @@ const socket = io(import.meta.env.VITE_BACKEND_URL, {
   autoConnect: false, // 🔥 important
 });
 
+
 export const connectSocket = (token) => {
-  if (socket.connected) {
-    socket.disconnect();
+  if (!socket.connected) {
+    socket.auth = { accessToken: token };
+    socket.connect();
   }
-  socket.auth = { accessToken: token };
-  socket.connect();
 };
 
 export const disconnectSocket = () => {
