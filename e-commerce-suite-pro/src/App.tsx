@@ -34,6 +34,7 @@ import AdminCustomers from "@/pages/admin/AdminCustomers";
 import AdminCategories from "@/pages/admin/AdminCategories";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminSingleProduct from "@/pages/admin/AdminSingleProduct";
+import AdminAppearanceBanner from "@/pages/admin/AdminAppearanceBanner";
 
 // Super Admin Pages
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
@@ -87,6 +88,7 @@ const App = () => (
                   <Route path="categories" element={<AdminCategories />} />
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="product/:id" element={<AdminSingleProduct />} />
+                  <Route path="appearance" element={<AdminAppearanceBanner />} />
                 </Route>
               </Route>
 

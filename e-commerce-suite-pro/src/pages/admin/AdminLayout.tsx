@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   Bell,
+  Palette 
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ const navItems = [
   { icon: ShoppingCart, label: 'Orders', path: '/admin/orders' },
   { icon: Users, label: 'Customers', path: '/admin/customers' },
   { icon: FolderTree, label: 'Categories', path: '/admin/categories' },
+    { icon: Palette, label: 'Appearance', path: '/admin/appearance' },
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 

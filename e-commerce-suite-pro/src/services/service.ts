@@ -129,6 +129,43 @@ export const getDashboardSummary = async () => {
 export const getDashboardOverview = async () => {
     const res = await api.get("/api/admin/dashboard/dashboardoverveiw");
     return res;
+};
+
+
+
+export const addBanner = async (obj: any) => {
+    const res = await api.post("/api/admin/banner/add", obj);
+    return res;
+}
+
+
+export const getAllBanners = async () => {
+    const res = await api.get("/api/admin/banner/get");
+    return res;
+}
+
+
+export const updateBanner = async (obj: any) => {
+    const res = await api.put("/api/admin/banner/update", obj);
+    return res;
+}
+
+
+export const deleteBanner = async (id: string) => {
+    const res = await api.get(`/api/admin/banner/delete/${id}`);
+    return res;
+}
+
+
+export const changeBannerStatus = async (id:string) => {
+    const res = await api.get(`/api/admin/banner/status/${id}`);
+    return res;
+}
+
+
+export const getActiveBanners = async () => {
+    const res = await api.get("/api/admin/banner/active");
+    return res;
 }
 
 

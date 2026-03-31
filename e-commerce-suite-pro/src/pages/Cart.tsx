@@ -400,7 +400,7 @@ const Cart = () => {
             )}
 
             {/* Recommended Products */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            {/* <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">You May Also Like</h2>
               <div className="grid grid-cols-3 gap-4">
                 {recommendedProducts.map((product) => (
@@ -437,7 +437,7 @@ const Cart = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Order Summary Sidebar */}
