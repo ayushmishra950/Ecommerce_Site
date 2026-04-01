@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Smartphone, Shirt, Watch, Home, Dumbbell, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { categories } from '@/data/products';
@@ -18,6 +18,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export const CategorySection = () => {
+  const navigate = useNavigate();
   // const [categoryList, setCategoryList] = useState([]);
   const dispatch = useAppDispatch();
   const categoryList = useAppSelector((state) => state?.category?.categoryList);
@@ -41,7 +42,7 @@ export const CategorySection = () => {
   }, [categoryList?.length])
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="py-16 bg-muted/30" id="categories">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-foreground mb-2">Shop by Category</h2>
@@ -52,8 +53,9 @@ export const CategorySection = () => {
           {categoryList?.map((category) => {
             const Icon = iconMap[category.icon] || Smartphone;
             return (
-              <Link key={category._id} to={`/products?category=${category.name}`}>
-                <Card className="group hover:border-primary/50 hover:shadow-md transition-all duration-300 cursor-pointer">
+                <Card key={category?._id} className="group hover:border-primary/50 hover:shadow-md transition-all duration-300 cursor-pointer" onClick={() => {
+        navigate("/products", { state: { id: category?._id } });
+      }}>
                   <CardContent className="p-6 flex flex-col items-center text-center">
                     <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
                       <Icon className="h-7 w-7 text-primary" />
@@ -62,7 +64,6 @@ export const CategorySection = () => {
                     <p className="text-sm text-muted-foreground">{category?.product?.length} items</p>
                   </CardContent>
                 </Card>
-              </Link>
             );
           })}
         </div>
