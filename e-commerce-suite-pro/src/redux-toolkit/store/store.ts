@@ -9,6 +9,7 @@ import dashboardReducer from "../slice/dashboardSlice";
 import settingReducer from "../slice/settingSlice";
 import reviewReducer from "../slice/reviewSlice";
 import shopReducer from "../slice/shopSlice";
+import bannerReducer from "../slice/bannerSlice";
 
 
 export const store = configureStore({
@@ -23,6 +24,7 @@ export const store = configureStore({
         setting: settingReducer,
         review: reviewReducer,
         shop: shopReducer,
+        banner: bannerReducer
     }
 })
 

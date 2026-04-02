@@ -12,20 +12,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AddBannerDialog from "@/components/form/AddBannerDialog";
 import {getAllBanners} from "@/services/service";
+import { useAppDispatch, useAppSelector } from "@/redux-toolkit/hooks/hook";
+import { setBannerList } from "@/redux-toolkit/slice/bannerSlice";
 
 const AdminAppearanceBanner = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const [searchQuery, setSearchQuery] = useState("");
-  const [bannerList, setBannerList] = useState<any[]>([]);
   const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
   const [initialData, setInitialData] = useState(null);
   const [bannerListRefresh, setBannerListRefresh] = useState(false);
-
+  const dispatch = useAppDispatch();
+  const bannerList = useAppSelector((state)=> state?.banner?.bannerList);
   
   const filteredBanners = bannerList.filter((banner) =>
     banner.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
 
   const handleGetAllBanners = async () => {
     if(!user?.shopId) return;
@@ -33,7 +34,7 @@ const AdminAppearanceBanner = () => {
       const res = await getAllBanners(user?.shopId);
       console.log(res.data);
       if(res.status === 200){
-        setBannerList(res?.data?.data || []);
+        dispatch(setBannerList(res?.data?.data))
       }
     } catch (error) {
       console.error("Error fetching banners:", error);

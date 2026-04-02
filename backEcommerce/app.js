@@ -6,6 +6,10 @@ const cookieParser = require("cookie-parser");
 const { connectDB } = require("./config/db");
 const { protect } = require("./middlewares/auth.middleware");
 const {initSocket} = require("./utils/socket.util");
+const session = require('express-session');
+const passport = require('./validations/auth.validation');
+const path = require("path");
+
 
 // user k liye
 const userAuthRoutes = require("./routes/user/auth.route");
@@ -43,6 +47,14 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ origin: ["http://localhost:8080", "http://localhost:8081", "http://localhost:8082"], credentials: true }));
+app.use(session({
+    secret: 'mysecret',
+    resave: false,
+    saveUninitialized: true
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 setupSwagger(app);
 
 // User Routes
@@ -71,17 +83,46 @@ app.use("/api/admin/banner", protect, adminBannerRoutes);
 app.use("/api/superadmin/shop", superAdminShopRoute);
 
 
-
 // Default route
 app.get("/", (req, res) => {
   res.send("API is running");
 });
+
+
+app.get('/auth/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    (req, res) => {
+        res.redirect('/dashboard'); // login ke baad
+    }
+);
+
+app.use(express.static(path.join(__dirname, "build")))
+
+// Test route
+app.get('/dashboard', (req, res) => {
+    if (req.isAuthenticated()) {
+         res.sendFile(path.join(__dirname, "build", "index.html"));
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.get('/login', (req, res) => {
+    res.send('<a href="/auth/google"><button>Login with Google</button></a>');
+});
+
+
 
 // Error handling middleware (optional)
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: "Something went wrong!" });
 });
+
 
 
 
@@ -97,6 +138,8 @@ const startServer = async () => {
     console.error("Error starting server:", error);
   }
 };
+
+ 
 
 
 module.exports = startServer;

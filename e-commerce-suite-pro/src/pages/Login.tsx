@@ -19,7 +19,6 @@ const Login = () => {
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setIsLoading(true);
-
   try {
     const user = await login(email, password);
        
@@ -112,10 +111,9 @@ const handleSubmit = async (e: React.FormEvent) => {
   <Button
     variant="outline"
     className="w-full flex items-center justify-center gap-2"
-    onClick={() => {
-      // yaha baad me Google auth logic lagana
-      console.log("Google Sign In");
-    }}
+   onClick={() => {
+    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
+  }}
   >
     <img
       src="https://www.svgrepo.com/show/475656/google-color.svg"
