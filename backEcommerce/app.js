@@ -47,7 +47,7 @@ connectDB();
 // Body parser
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: ["https://check-ecommerce-frontend.onrender.com"], credentials: true }));
+app.use(cors({ origin: ["http://localhost:5001","http://localhost:8080", "http://localhost:8081", "http://localhost:8082"], credentials: true }));
 app.use(session({
     secret: 'mysecret',
     resave: false,
@@ -128,7 +128,7 @@ app.get('/auth/google/callback',
 
         const token = generateAccessToken(payload); 
 
-        res.redirect(`http://localhost:8080/login-success?token=${token}`);
+        res.redirect(`http://localhost:5001/login-success?token=${token}`);
     }
 );
 
