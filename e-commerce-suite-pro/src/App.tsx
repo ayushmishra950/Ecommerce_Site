@@ -48,7 +48,7 @@ const queryClient = new QueryClient();
 
 const HomeRoute = () => {
   const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <Index /> : <Navigate to="/login" />;
+  return isAuthenticated ? <Index /> : <Login />;
 };
 
 const App = () => (
@@ -58,7 +58,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <HashRouter>
             <Routes>
               {/* User Routes */}
               <Route element={<UserLayout />}>
@@ -109,7 +109,7 @@ const App = () => (
               {/* Catch-all */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
+          </HashRouter>
         </TooltipProvider>
       </CartProvider>
     </AuthProvider>
