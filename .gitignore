@@ -2,12 +2,6 @@
 backEcommerce/node_modules/
 e-commerce-suit-pro/node_modules/
 
-# Environment files
-.env
-.env.*
-frontend/.env
-backend/.env
-
 # Build outputs
 frontend/dist/
 frontend/build/
