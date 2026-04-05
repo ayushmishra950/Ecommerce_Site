@@ -95,7 +95,7 @@ let io;
 
 const initSocket = (server) => {
     io = new Server(server, {
-        cors: { origin: "http://localhost:8080" }
+        cors: { origin: "https://check-ecommerce-frontend.onrender.com" }
     });
 
     // 🔐 Auth Middleware
